@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>予約の確認・変更 | VANDS & LIAS Medical Academy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Sans+JP:wght@300;400;500;700&family=Shippori+Mincho+B1:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #F5F1EA;
+    --bg-alt:    #EDE7DD;
+    --bg-deep:   #1F1B17;
+    --ink:       #1F1B17;
+    --ink-soft:  #5C544C;
+    --ink-mute:  #8A8276;
+    --accent:    #9C4A2D;
+    --accent-soft: #C97F62;
+    --accent-bg: #F4E8E2;
+    --rule:      #D5CCC0;
+    --rule-soft: #E5DED1;
+    --success:   #5A7A4F;
+    --warn:      #B07A2A;
+    --danger:    #8E3A3A;
+
+    --font-display: "Shippori Mincho B1", "Noto Serif JP", serif;
+    --font-body:    "Noto Sans JP", sans-serif;
+    --font-en:      "Cormorant Garamond", serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent); color: var(--bg); }
+
+  .page-wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 60px clamp(20px, 5vw, 60px) 100px;
+  }
+  .header {
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 32px;
+    margin-bottom: 48px;
+  }
+  .header-en {
+    font-family: var(--font-en);
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    color: var(--ink-mute);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .header-title {
+    font-family: var(--font-display);
+    font-size: clamp(22px, 3vw, 30px);
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+  .event-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    font-family: var(--font-en);
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+  .event-meta strong {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* ───── Section ───── */
+  .section {
+    margin-bottom: 56px;
+  }
+  .section-num {
+    font-family: var(--font-en);
+    font-size: 11px;
+    font-style: italic;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .section-desc {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 24px;
+  }
+
+  /* ───── Reservation card (read-only top) ───── */
+  .res-card {
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    padding: 28px 32px;
+    margin-bottom: 32px;
+  }
+  .res-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 32px;
+  }
+  .res-item {
+    display: flex;
+    flex-direction: column;
+  }
+  .res-key {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-mute);
+    margin-bottom: 4px;
+  }
+  .res-val {
+    font-size: 15px;
+    font-family: var(--font-display);
+    font-weight: 500;
+  }
+  .res-val.en {
+    font-family: var(--font-en);
+    font-size: 14px;
+    letter-spacing: 0.05em;
+  }
+  .res-status {
+    display: inline-block;
+    padding: 3px 12px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    margin-left: 8px;
+  }
+  .res-status.confirmed {
+    background: rgba(90,122,79,0.12);
+    color: var(--success);
+  }
+  .res-status.cancelled {
+    background: rgba(142,58,58,0.12);
+    color: var(--danger);
+  }
+
+  /* ───── Form ───── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px 32px;
+  }
+  .form-row {
+    display: flex;
+    flex-direction: column;
+  }
+  .form-row.full { grid-column: 1 / -1; }
+  .form-label {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+  .form-input,
+  .form-textarea {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--rule);
+    padding: 8px 0 10px;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--ink);
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .form-input:focus,
+  .form-textarea:focus {
+    outline: none;
+    border-bottom-color: var(--accent);
+  }
+  .form-textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  /* ───── Schedule grid ───── */
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: 100px repeat(3, 1fr);
+    gap: 1px;
+    background: var(--rule-soft);
+    border: 1px solid var(--rule);
+  }
+  .grid-head {
+    background: var(--bg-deep);
+    color: var(--bg);
+    padding: 14px 16px;
+    text-align: center;
+    font-family: var(--font-en);
+    font-size: 12px;
+    letter-spacing: 0.2em;
+  }
+  .grid-head-time {
+    background: var(--bg-alt);
+    color: var(--ink);
+  }
+  .grid-time {
+    background: var(--bg-alt);
+    padding: 24px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  .grid-time-label {
+    font-family: var(--font-en);
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.15em;
+    margin-bottom: 6px;
+  }
+  .grid-time-range {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .grid-cell {
+    background: var(--bg);
+    padding: 18px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 130px;
+  }
+  .grid-cell:hover:not(.full):not(.selected):not(.locked) {
+    background: var(--accent-bg);
+  }
+  .grid-cell.selected {
+    background: var(--bg-deep);
+    color: var(--bg);
+  }
+  .grid-cell.selected .cell-doctor { color: var(--accent-soft); }
+  .grid-cell.selected .cell-remaining-num,
+  .grid-cell.selected .cell-remaining-label { color: var(--bg-alt); }
+  .grid-cell.full {
+    background: var(--bg-alt);
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+  .grid-cell.full::after {
+    content: "満席";
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-8deg);
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--danger);
+    opacity: 0.7;
+    letter-spacing: 0.15em;
+  }
+  .grid-cell.current::before {
+    content: "現在の選択";
+    position: absolute;
+    top: 0; right: 0;
+    background: var(--accent);
+    color: var(--bg);
+    font-family: var(--font-en);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    padding: 3px 8px;
+    text-transform: uppercase;
+  }
+  .grid-cell.locked {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  .cell-doctor {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .cell-procedure {
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+  .cell-desc {
+    font-size: 11px;
+    color: var(--ink-mute);
+    line-height: 1.4;
+    margin-bottom: 4px;
+  }
+  .grid-cell.selected .cell-desc { color: var(--bg-alt); opacity: 0.7; }
+  .cell-remaining {
+    margin-top: auto;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    padding-top: 8px;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .grid-cell.selected .cell-remaining { border-top-color: rgba(255,255,255,0.2); }
+  .cell-remaining-num {
+    font-family: var(--font-en);
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .cell-remaining-num.low { color: var(--warn); }
+  .cell-remaining-num.critical { color: var(--danger); }
+  .cell-remaining-label {
+    font-size: 10px;
+    color: var(--ink-mute);
+    letter-spacing: 0.1em;
+  }
+
+  /* ───── Action bar ───── */
+  .action-bar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .btn {
+    font-family: var(--font-body);
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    padding: 14px 32px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+  .btn-primary {
+    background: var(--bg-deep);
+    color: var(--bg);
+  }
+  .btn-primary:hover { background: var(--accent); }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1px solid var(--rule);
+  }
+  .btn-ghost:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ───── Danger zone ───── */
+  .danger-zone {
+    margin-top: 80px;
+    padding: 28px 32px;
+    border: 1px solid var(--danger);
+    background: rgba(142, 58, 58, 0.04);
+  }
+  .danger-zone.disabled {
+    border-color: var(--rule);
+    background: var(--bg-alt);
+  }
+  .danger-title {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--danger);
+    margin-bottom: 8px;
+  }
+  .danger-zone.disabled .danger-title { color: var(--ink-mute); }
+  .danger-desc {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 20px;
+  }
+  .deadline-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    font-family: var(--font-en);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    margin-bottom: 16px;
+    color: var(--ink-soft);
+  }
+  .deadline-info strong {
+    color: var(--accent);
+    font-family: var(--font-display);
+    font-weight: 600;
+  }
+  .deadline-info.urgent strong { color: var(--warn); }
+  .deadline-info.passed {
+    background: rgba(142,58,58,0.06);
+    border-color: var(--danger);
+  }
+  .deadline-info.passed strong { color: var(--danger); }
+  .btn-danger {
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    padding: 10px 24px;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-danger:hover {
+    background: var(--danger);
+    color: var(--bg);
+  }
+  .btn-danger:disabled {
+    background: transparent;
+    color: var(--ink-mute);
+    border-color: var(--rule);
+    cursor: not-allowed;
+  }
+  .btn-danger:disabled:hover {
+    background: transparent;
+    color: var(--ink-mute);
+  }
+  .contact-fallback {
+    margin-top: 16px;
+    padding: 14px 18px;
+    background: var(--bg);
+    border-left: 3px solid var(--accent);
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .contact-fallback a {
+    color: var(--accent);
+    text-decoration: none;
+    font-family: var(--font-en);
+    letter-spacing: 0.04em;
+  }
+  .contact-fallback a:hover { text-decoration: underline; }
+
+  /* ───── Modal ───── */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(31, 27, 23, 0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--bg);
+    max-width: 480px;
+    width: 90%;
+    padding: 36px 36px 28px;
+    border: 1px solid var(--rule);
+  }
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .modal-body {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-bottom: 24px;
+    line-height: 1.7;
+  }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+
+  /* ───── Toast ───── */
+  .toast {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: var(--bg-deep);
+    color: var(--bg);
+    padding: 14px 28px;
+    font-size: 13px;
+    transition: transform 0.3s ease;
+    z-index: 100;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { background: var(--success); }
+  .toast.danger  { background: var(--danger); }
+
+  /* ───── Mobile ───── */
+  @media (max-width: 720px) {
+    .form-grid, .res-grid { grid-template-columns: 1fr; }
+    .schedule-grid { grid-template-columns: 80px repeat(3, 1fr); font-size: 13px; }
+    .grid-cell { padding: 12px 8px; min-height: 110px; }
+    .cell-procedure { font-size: 12px; }
+    .cell-desc { display: none; }
+  }
+
+  /* ───── Cancelled state ───── */
+  .cancelled-banner {
+    background: rgba(142, 58, 58, 0.08);
+    border: 1px solid var(--danger);
+    padding: 28px 32px;
+    margin-bottom: 32px;
+    text-align: center;
+  }
+  .cancelled-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--danger);
+    margin-bottom: 8px;
+  }
+  .cancelled-desc {
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <header class="header">
+    <div class="header-en">VANDS & LIAS · Medical Academy</div>
+    <h1 class="header-title">ご予約の確認・変更</h1>
+    <div class="event-meta">
+      <span><strong>第1回</strong></span>
+      <span>2026.06.28 (日)</span>
+      <span>Vands Clinic 江南院</span>
+    </div>
+  </header>
+
+  <!-- Cancelled banner (only shown if cancelled) -->
+  <div id="cancelled-banner" class="cancelled-banner" style="display:none;">
+    <div class="cancelled-title">このご予約はキャンセル済みです</div>
+    <div class="cancelled-desc">再度ご参加いただける場合は、お手数ですが新規お申込みフォームよりお手続きください。</div>
+  </div>
+
+  <!-- ───── 現在の予約内容 ───── -->
+  <section class="section">
+    <div class="section-num">RESERVATION DETAILS</div>
+    <h2 class="section-title">現在のご予約内容</h2>
+    <p class="section-desc">下記の内容で予約を承っております。変更が必要な項目を下の各セクションでご修正ください。</p>
+
+    <div class="res-card">
+      <div class="res-grid">
+        <div class="res-item">
+          <span class="res-key">氏名</span>
+          <span class="res-val" id="r-name"></span>
+        </div>
+        <div class="res-item">
+          <span class="res-key">クリニック</span>
+          <span class="res-val" id="r-clinic"></span>
+        </div>
+        <div class="res-item">
+          <span class="res-key">職種・資格</span>
+          <span class="res-val" id="r-profession"></span>
+        </div>
+        <div class="res-item">
+          <span class="res-key">申込日</span>
+          <span class="res-val en" id="r-created"></span>
+        </div>
+        <div class="res-item">
+          <span class="res-key">予約状態</span>
+          <span class="res-val" id="r-status"></span>
+        </div>
+        <div class="res-item">
+          <span class="res-key">予約番号</span>
+          <span class="res-val en" id="r-id"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───── 連絡先・追加情報の変更 ───── -->
+  <section class="section">
+    <div class="section-num">01 / CONTACT INFO</div>
+    <h2 class="section-title">連絡先・追加情報の変更</h2>
+    <p class="section-desc">メールアドレス・電話番号・専門領域・備考は下記から変更できます。</p>
+
+    <div class="form-grid">
+      <div class="form-row">
+        <label class="form-label">メールアドレス</label>
+        <input class="form-input" id="f-email" type="email">
+      </div>
+      <div class="form-row">
+        <label class="form-label">携帯電話</label>
+        <input class="form-input" id="f-phone">
+      </div>
+      <div class="form-row full">
+        <label class="form-label">専門領域・関心のある施術</label>
+        <input class="form-input" id="f-specialty">
+      </div>
+      <div class="form-row full">
+        <label class="form-label">備考・特別なご要望</label>
+        <textarea class="form-textarea" id="f-notes"></textarea>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button class="btn btn-primary" id="btn-save-info" onclick="saveContactInfo()">連絡先を更新する</button>
+    </div>
+  </section>
+
+  <!-- ───── スケジュール変更 ───── -->
+  <section class="section">
+    <div class="section-num">02 / SCHEDULE</div>
+    <h2 class="section-title">受講スケジュールの変更</h2>
+    <p class="section-desc">「現在の選択」と表示されているセッションが現在のご予約です。変更したい場合は別のセッションをクリックしてください。空席のあるセッションのみ選択可能です。</p>
+
+    <div class="schedule-grid" id="schedule-grid"></div>
+
+    <div class="action-bar">
+      <button class="btn btn-ghost" onclick="resetScheduleSelection()">変更を取り消す</button>
+      <button class="btn btn-primary" id="btn-save-schedule" onclick="saveSchedule()" disabled>スケジュール変更を確定</button>
+    </div>
+  </section>
+
+  <!-- ───── キャンセル ───── -->
+  <section class="danger-zone" id="cancel-zone">
+    <div class="danger-title" id="cancel-title">ご予約のキャンセル</div>
+    <div class="deadline-info" id="deadline-info"></div>
+    <div class="danger-desc" id="cancel-desc">予約をキャンセルすると、選択された3コマすべての席が解放され、他の方が予約可能になります。キャンセル後の再申込は新規お申込みフォームからお願いいたします。</div>
+    <button class="btn-danger" id="btn-cancel" onclick="openCancelModal()">予約をキャンセルする</button>
+    <div class="contact-fallback" id="contact-fallback" style="display:none;">
+      キャンセル期限を過ぎたため、こちらのフォームからのキャンセルはできません。やむを得ない事情でキャンセルが必要な場合は、お早めに事務局までご連絡ください。<br>
+      <a href="mailto:academy@vands-lias.jp">academy@vands-lias.jp</a>
+    </div>
+  </section>
+
+</div>
+
+<!-- ───── Cancel confirmation modal ───── -->
+<div class="modal-overlay" id="cancel-modal">
+  <div class="modal">
+    <div class="modal-title">本当にキャンセルしますか?</div>
+    <div class="modal-body">
+      この操作は取り消せません。予約を確定した3コマ分の席がすべて解放されます。<br>
+      キャンセル完了後、ご登録メールアドレスにキャンセル確認メールをお送りします。
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeCancelModal()">いいえ、戻る</button>
+      <button class="btn-danger" onclick="confirmCancel()">はい、キャンセルする</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// モックデータ ── 本番は Supabase からトークンを使って取得
+// ════════════════════════════════════════════════════════════════
+
+const SESSIONS = [
+  { id: 'S1A', slot: 1, room: 'A', start: '08:00', end: '09:00',
+    doctor: '○○院長 (TBD)', procedure: '涙袋ヒアルロン酸注入',
+    desc: '眼窩下動脈の解剖を踏まえた安全な注入層・テクニック', remaining: 2, capacity: 6 },
+  { id: 'S1B', slot: 1, room: 'B', start: '08:00', end: '09:00',
+    doctor: '○○院長 (TBD)', procedure: 'ボトックスネックリフト',
+    desc: 'プラチスマ筋への注入による若返り効果', remaining: 5, capacity: 6 },
+  { id: 'S1C', slot: 1, room: 'C', start: '08:00', end: '09:00',
+    doctor: '○○院長 (TBD)', procedure: '鼻ヒアルロン酸注入',
+    desc: '韓国式ベクター注入法による自然な鼻形成', remaining: 1, capacity: 6 },
+  { id: 'S2A', slot: 2, room: 'A', start: '09:10', end: '10:10',
+    doctor: '○○院長 (TBD)', procedure: '顎ヒアルロン酸注入',
+    desc: 'アゴ形成における製剤選択と注入層の判断', remaining: 6, capacity: 6 },
+  { id: 'S2B', slot: 2, room: 'B', start: '09:10', end: '10:10',
+    doctor: '○○院長 (TBD)', procedure: '顔面ボトックス',
+    desc: '咬筋・前額部・眉間への複合アプローチ', remaining: 0, capacity: 6 },
+  { id: 'S2C', slot: 2, room: 'C', start: '09:10', end: '10:10',
+    doctor: '○○院長 (TBD)', procedure: '法令線ヒアルロン酸',
+    desc: '部位に応じた製剤選択と注入層の判断基準', remaining: 3, capacity: 6 },
+  { id: 'S3A', slot: 3, room: 'A', start: '10:20', end: '11:20',
+    doctor: '○○院長 (TBD)', procedure: '唇ヒアルロン酸',
+    desc: '自然なボリュームアップのためのリップ注入', remaining: 6, capacity: 6 },
+  { id: 'S3B', slot: 3, room: 'B', start: '10:20', end: '11:20',
+    doctor: '○○院長 (TBD)', procedure: '糸リフト',
+    desc: 'PDOスレッドによるリフトアップ技術', remaining: 2, capacity: 6 },
+  { id: 'S3C', slot: 3, room: 'C', start: '10:20', end: '11:20',
+    doctor: '○○院長 (TBD)', procedure: 'こめかみヒアルロン酸',
+    desc: '浅側頭動脈を回避する高リスク部位の注入術', remaining: 4, capacity: 6 },
+];
+
+const PROFESSION_LABEL = {
+  doctor_employed: '勤務医',
+  doctor_owner:    '開業医',
+  nurse:           '看護師',
+  other:           'その他',
+};
+
+// モック予約データ(本番では URL token から Supabase で取得)
+const RESERVATION = {
+  id:             'VLMA-2026-0042',
+  token:          'a3f8b2c1-9d4e-4f7a-8b3c-2e1f5a6b8d9c',
+  name:           '田中 健一',
+  name_kana:      'たなか けんいち',
+  email:          'tanaka@tanaka-clinic.jp',
+  phone:          '090-1234-5678',
+  clinic:         '田中クリニック',
+  profession:     'doctor_owner',
+  specialty:      '美容皮膚科, ヒアルロン酸',
+  referral:       'kim-clinic',
+  notes:          '',
+  status:         'confirmed',
+  created:        '2026-05-08 14:23',
+  sessions:       ['S1A', 'S2A', 'S3A'],
+};
+
+// イベント情報(本番では同じクエリで取得)
+const EVENT = {
+  title:                 '第1回 VANDS & LIAS Medical Academy',
+  event_date:            '2026-06-28',
+  venue:                 'Vands Clinic 江南院',
+  cancellation_deadline: '2026-06-18',   // 開催10日前
+};
+
+// 自分の現在の予約が占有している席は「空き」として扱う必要がある
+SESSIONS.forEach(s => {
+  if (RESERVATION.sessions.includes(s.id)) {
+    s.remaining += 1; // 自分の席を返却した状態で他の選択肢を判断
+  }
+});
+
+let currentSelection = { ...arrayToSlotMap(RESERVATION.sessions) };
+let originalSelection = { ...currentSelection };
+
+function arrayToSlotMap(arr) {
+  return arr.reduce((map, sid) => {
+    const slot = parseInt(sid[1]);
+    map[slot] = sid;
+    return map;
+  }, {});
+}
+
+// ════════════════════════════════════════════════════════════════
+// 初期化
+// ════════════════════════════════════════════════════════════════
+
+function init() {
+  // URL から token 取得(本番では Supabase に問い合わせ)
+  // const params = new URLSearchParams(window.location.search);
+  // const token = params.get('token');
+  // if (!token) { showInvalidTokenError(); return; }
+
+  // 予約情報を表示
+  document.getElementById('r-name').textContent = `${RESERVATION.name} (${RESERVATION.name_kana})`;
+  document.getElementById('r-clinic').textContent = RESERVATION.clinic;
+  document.getElementById('r-profession').textContent = PROFESSION_LABEL[RESERVATION.profession];
+  document.getElementById('r-created').textContent = RESERVATION.created;
+  document.getElementById('r-id').textContent = RESERVATION.id;
+
+  const statusEl = document.getElementById('r-status');
+  statusEl.innerHTML = RESERVATION.status === 'confirmed'
+    ? '<span class="res-status confirmed">確定</span>'
+    : '<span class="res-status cancelled">キャンセル済み</span>';
+
+  // 連絡先フォームに既存値をセット
+  document.getElementById('f-email').value     = RESERVATION.email;
+  document.getElementById('f-phone').value     = RESERVATION.phone;
+  document.getElementById('f-specialty').value = RESERVATION.specialty || '';
+  document.getElementById('f-notes').value     = RESERVATION.notes || '';
+
+  // キャンセル済みなら編集機能を無効化
+  if (RESERVATION.status === 'cancelled') {
+    document.getElementById('cancelled-banner').style.display = 'block';
+    document.querySelectorAll('.btn').forEach(b => b.disabled = true);
+    document.getElementById('cancel-zone').style.display = 'none';
+  } else {
+    setupCancelDeadline();
+  }
+
+  renderSchedule();
+}
+
+// ════════════════════════════════════════════════════════════════
+// キャンセル期限の表示・有効/無効判定
+// ════════════════════════════════════════════════════════════════
+
+function setupCancelDeadline() {
+  const deadline = new Date(EVENT.cancellation_deadline + 'T23:59:59+09:00');
+  const today    = new Date();
+  const msPerDay = 1000 * 60 * 60 * 24;
+  const daysLeft = Math.ceil((deadline - today) / msPerDay);
+
+  const deadlineFmt = formatJaDate(EVENT.cancellation_deadline);
+  const infoEl = document.getElementById('deadline-info');
+  const btnEl  = document.getElementById('btn-cancel');
+  const descEl = document.getElementById('cancel-desc');
+  const zoneEl = document.getElementById('cancel-zone');
+  const fallback = document.getElementById('contact-fallback');
+
+  if (daysLeft < 0) {
+    // 期限切れ
+    infoEl.classList.add('passed');
+    infoEl.innerHTML = `キャンセル期限: <strong>${deadlineFmt}</strong> — 期限を過ぎています`;
+    btnEl.disabled = true;
+    btnEl.textContent = 'キャンセル期限を過ぎました';
+    zoneEl.classList.add('disabled');
+    descEl.style.display = 'none';
+    fallback.style.display = 'block';
+  } else if (daysLeft <= 3) {
+    // 直前(3日以内)— 警告色
+    infoEl.classList.add('urgent');
+    infoEl.innerHTML = `キャンセル期限: <strong>${deadlineFmt}</strong> (残り ${daysLeft} 日)`;
+  } else {
+    // 通常
+    infoEl.innerHTML = `キャンセル期限: <strong>${deadlineFmt}</strong> (残り ${daysLeft} 日)`;
+  }
+}
+
+function formatJaDate(iso) {
+  const d = new Date(iso + 'T00:00:00+09:00');
+  const wd = ['日','月','火','水','木','金','土'][d.getDay()];
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 (${wd})`;
+}
+
+// ════════════════════════════════════════════════════════════════
+// スケジュールグリッド描画
+// ════════════════════════════════════════════════════════════════
+
+function renderSchedule() {
+  const grid = document.getElementById('schedule-grid');
+  grid.innerHTML = `
+    <div class="grid-head grid-head-time">時間</div>
+    <div class="grid-head">A 室</div>
+    <div class="grid-head">B 室</div>
+    <div class="grid-head">C 室</div>
+  `;
+
+  for (let slot = 1; slot <= 3; slot++) {
+    const first = SESSIONS.find(s => s.slot === slot);
+
+    // 時間列
+    const timeCell = document.createElement('div');
+    timeCell.className = 'grid-time';
+    timeCell.innerHTML = `
+      <div class="grid-time-label">${slot}限</div>
+      <div class="grid-time-range">${first.start}<br>—<br>${first.end}</div>
+    `;
+    grid.appendChild(timeCell);
+
+    for (const room of ['A','B','C']) {
+      const session = SESSIONS.find(s => s.slot === slot && s.room === room);
+      const isCurrent = originalSelection[slot] === session.id;
+      const isSelected = currentSelection[slot] === session.id;
+      const isFull = !isCurrent && session.remaining <= 0;
+
+      const cell = document.createElement('div');
+      cell.className = 'grid-cell';
+      if (isCurrent && isSelected) cell.classList.add('current');
+      if (isSelected) cell.classList.add('selected');
+      if (isFull) cell.classList.add('full');
+
+      const remainClass = session.remaining === 0 ? 'critical'
+                       : session.remaining <= 2 ? 'low' : '';
+
+      cell.innerHTML = `
+        <div class="cell-doctor">${session.doctor}</div>
+        <div class="cell-procedure">${session.procedure}</div>
+        <div class="cell-desc">${session.desc}</div>
+        <div class="cell-remaining">
+          <span class="cell-remaining-num ${remainClass}">${session.remaining}</span>
+          <span class="cell-remaining-label">/ ${session.capacity} 残席</span>
+        </div>
+      `;
+
+      if (!isFull && RESERVATION.status === 'confirmed') {
+        cell.addEventListener('click', () => selectSession(slot, session.id));
+      }
+      grid.appendChild(cell);
+    }
+  }
+
+  updateSaveButton();
+}
+
+function selectSession(slot, sessionId) {
+  currentSelection[slot] = sessionId;
+  renderSchedule();
+}
+
+function resetScheduleSelection() {
+  currentSelection = { ...originalSelection };
+  renderSchedule();
+  toast('スケジュール変更を取り消しました');
+}
+
+function updateSaveButton() {
+  const changed = [1,2,3].some(slot => currentSelection[slot] !== originalSelection[slot]);
+  document.getElementById('btn-save-schedule').disabled = !changed;
+}
+
+// ════════════════════════════════════════════════════════════════
+// 連絡先保存
+// ════════════════════════════════════════════════════════════════
+
+async function saveContactInfo() {
+  const email     = document.getElementById('f-email').value.trim();
+  const phone     = document.getElementById('f-phone').value.trim();
+  const specialty = document.getElementById('f-specialty').value.trim();
+  const notes     = document.getElementById('f-notes').value.trim();
+
+  if (!email || !phone) {
+    toast('メールアドレスと携帯電話は必須項目です', 'danger');
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    toast('メールアドレスの形式が正しくありません', 'danger');
+    return;
+  }
+
+  // 本番では:
+  // await supabase.from('registrations')
+  //   .update({ email, phone, specialty, notes })
+  //   .eq('management_token', TOKEN);
+
+  Object.assign(RESERVATION, { email, phone, specialty, notes });
+  toast('連絡先を更新しました', 'success');
+}
+
+// ════════════════════════════════════════════════════════════════
+// スケジュール変更保存
+// ════════════════════════════════════════════════════════════════
+
+async function saveSchedule() {
+  // 本番では Supabase RPC で原子的に再予約処理:
+  //
+  // const { data } = await supabase.rpc('update_registration_sessions', {
+  //   p_token: TOKEN,
+  //   p_new_session_ids: Object.values(currentSelection),
+  // });
+  // if (!data.success && data.error === 'sessions_full') {
+  //   toast('選択された枠が満席になりました');
+  //   return;
+  // }
+
+  // モック処理: 旧→新 で残席カウンタ調整
+  for (let slot = 1; slot <= 3; slot++) {
+    const oldId = originalSelection[slot];
+    const newId = currentSelection[slot];
+    if (oldId !== newId) {
+      const oldS = SESSIONS.find(s => s.id === oldId);
+      const newS = SESSIONS.find(s => s.id === newId);
+      oldS.remaining += 1;
+      newS.remaining -= 1;
+    }
+  }
+
+  RESERVATION.sessions = Object.values(currentSelection);
+  originalSelection = { ...currentSelection };
+
+  // 自分の選択席を改めて空きに足し戻す表示処理
+  SESSIONS.forEach(s => {
+    if (RESERVATION.sessions.includes(s.id)) {
+      // 既に上で計算済みなので不要(モック用注釈)
+    }
+  });
+
+  renderSchedule();
+  toast('スケジュールを変更しました。確認メールをお送りします', 'success');
+}
+
+// ════════════════════════════════════════════════════════════════
+// キャンセル
+// ════════════════════════════════════════════════════════════════
+
+function openCancelModal() {
+  document.getElementById('cancel-modal').classList.add('show');
+}
+function closeCancelModal() {
+  document.getElementById('cancel-modal').classList.remove('show');
+}
+async function confirmCancel() {
+  // 期限再チェック(本番ではサーバー側でも検証)
+  const deadline = new Date(EVENT.cancellation_deadline + 'T23:59:59+09:00');
+  if (new Date() > deadline) {
+    toast('キャンセル期限を過ぎたためキャンセルできません', 'danger');
+    closeCancelModal();
+    setupCancelDeadline();
+    return;
+  }
+
+  // 本番では:
+  // const { data } = await supabase.rpc('cancel_registration', { p_token: TOKEN });
+  // if (!data.success && data.error === 'deadline_passed') {
+  //   toast(`キャンセル期限(${data.deadline})を過ぎました`, 'danger');
+  //   return;
+  // }
+
+  RESERVATION.status = 'cancelled';
+  closeCancelModal();
+  toast('予約をキャンセルしました', 'danger');
+
+  setTimeout(() => {
+    document.getElementById('cancelled-banner').style.display = 'block';
+    document.getElementById('r-status').innerHTML = '<span class="res-status cancelled">キャンセル済み</span>';
+    document.getElementById('cancel-zone').style.display = 'none';
+    document.querySelectorAll('.btn').forEach(b => b.disabled = true);
+    document.querySelectorAll('.grid-cell').forEach(c => c.style.pointerEvents = 'none');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 800);
+}
+
+// ════════════════════════════════════════════════════════════════
+// Utility
+// ════════════════════════════════════════════════════════════════
+
+function toast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+init();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>受講申込 | VANDS & LIAS Medical Academy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Sans+JP:wght@300;400;500;700&family=Shippori+Mincho+B1:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #F5F1EA;
+    --bg-alt:    #EDE7DD;
+    --bg-deep:   #1F1B17;
+    --ink:       #1F1B17;
+    --ink-soft:  #5C544C;
+    --ink-mute:  #8A8276;
+    --accent:    #9C4A2D;
+    --accent-soft: #C97F62;
+    --accent-bg: #F4E8E2;
+    --rule:      #D5CCC0;
+    --rule-soft: #E5DED1;
+    --success:   #5A7A4F;
+    --warn:      #B07A2A;
+    --danger:    #8E3A3A;
+
+    --font-display: "Shippori Mincho B1", "Noto Serif JP", serif;
+    --font-body:    "Noto Sans JP", sans-serif;
+    --font-en:      "Cormorant Garamond", serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-weight: 400;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  ::selection { background: var(--accent); color: var(--bg); }
+
+  /* ───────── Layout ───────── */
+  .page-wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 60px clamp(20px, 5vw, 60px) 100px;
+  }
+
+  /* ───────── Header ───────── */
+  .header {
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 32px;
+    margin-bottom: 48px;
+  }
+  .header-en {
+    font-family: var(--font-en);
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    color: var(--ink-mute);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .header-title {
+    font-family: var(--font-display);
+    font-size: clamp(22px, 3vw, 30px);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    margin-bottom: 18px;
+  }
+  .event-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    font-family: var(--font-en);
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+  .event-meta span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .event-meta strong {
+    color: var(--accent);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+
+  /* ───────── Progress ───────── */
+  .progress {
+    display: flex;
+    gap: 0;
+    margin-bottom: 56px;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .step {
+    flex: 1;
+    padding: 16px 8px;
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--ink-mute);
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  .step-num {
+    font-family: var(--font-en);
+    font-size: 11px;
+    font-style: italic;
+    margin-right: 6px;
+    color: var(--ink-mute);
+  }
+  .step.active {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+  }
+  .step.active .step-num { color: var(--accent); }
+  .step.done { color: var(--ink-soft); }
+  .step.done .step-num { color: var(--accent-soft); }
+
+  /* ───────── Screens ───────── */
+  .screen { display: none; animation: fadeIn 0.4s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .screen-header {
+    margin-bottom: 36px;
+  }
+  .screen-num {
+    font-family: var(--font-en);
+    font-size: 12px;
+    font-style: italic;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .screen-title {
+    font-family: var(--font-display);
+    font-size: clamp(20px, 2.4vw, 26px);
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .screen-desc {
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+
+  /* ───────── Form ───────── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px 32px;
+  }
+  .form-row {
+    display: flex;
+    flex-direction: column;
+  }
+  .form-row.full { grid-column: 1 / -1; }
+  .form-label {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .required {
+    color: var(--accent);
+    font-size: 10px;
+  }
+  .form-input,
+  .form-select,
+  .form-textarea {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--rule);
+    padding: 8px 0 10px;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--ink);
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .form-input:focus,
+  .form-select:focus,
+  .form-textarea:focus {
+    outline: none;
+    border-bottom-color: var(--accent);
+  }
+  .form-textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+  .radio-group {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-top: 4px;
+  }
+  .radio-item {
+    position: relative;
+    cursor: pointer;
+  }
+  .radio-item input { position: absolute; opacity: 0; pointer-events: none; }
+  .radio-label {
+    display: inline-block;
+    padding: 8px 16px;
+    border: 1px solid var(--rule);
+    font-size: 13px;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .radio-item input:checked + .radio-label {
+    background: var(--bg-deep);
+    color: var(--bg);
+    border-color: var(--bg-deep);
+  }
+  .ref-hint {
+    font-size: 12px;
+    color: var(--accent-soft);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  /* ───────── Schedule Grid ───────── */
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: 100px repeat(3, 1fr);
+    gap: 1px;
+    background: var(--rule-soft);
+    border: 1px solid var(--rule);
+  }
+  .grid-head {
+    background: var(--bg-deep);
+    color: var(--bg);
+    padding: 14px 16px;
+    text-align: center;
+    font-family: var(--font-en);
+    font-size: 12px;
+    letter-spacing: 0.2em;
+  }
+  .grid-head-time {
+    background: var(--bg-alt);
+    color: var(--ink);
+  }
+  .grid-time {
+    background: var(--bg-alt);
+    padding: 24px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  .grid-time-label {
+    font-family: var(--font-en);
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.15em;
+    margin-bottom: 6px;
+  }
+  .grid-time-range {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .grid-cell {
+    background: var(--bg);
+    padding: 18px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 130px;
+  }
+  .grid-cell:hover:not(.full):not(.selected) {
+    background: var(--accent-bg);
+  }
+  .grid-cell.selected {
+    background: var(--bg-deep);
+    color: var(--bg);
+  }
+  .grid-cell.selected .cell-doctor { color: var(--accent-soft); }
+  .grid-cell.selected .cell-remaining-num,
+  .grid-cell.selected .cell-remaining-label { color: var(--bg-alt); }
+  .grid-cell.full {
+    background: var(--bg-alt);
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+  .grid-cell.full::after {
+    content: "満席";
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-8deg);
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--danger);
+    opacity: 0.7;
+    letter-spacing: 0.15em;
+  }
+  .cell-doctor {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+  .cell-procedure {
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+  .cell-desc {
+    font-size: 11px;
+    color: var(--ink-mute);
+    line-height: 1.4;
+    margin-bottom: 4px;
+  }
+  .grid-cell.selected .cell-desc { color: var(--bg-alt); opacity: 0.7; }
+  .cell-remaining {
+    margin-top: auto;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    padding-top: 8px;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .grid-cell.selected .cell-remaining { border-top-color: rgba(255,255,255,0.2); }
+  .cell-remaining-num {
+    font-family: var(--font-en);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .cell-remaining-num.low { color: var(--warn); }
+  .cell-remaining-num.critical { color: var(--danger); }
+  .cell-remaining-label {
+    font-size: 10px;
+    color: var(--ink-mute);
+    letter-spacing: 0.1em;
+  }
+  .cell-check {
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 22px; height: 22px;
+    border: 1px solid var(--rule);
+    border-radius: 50%;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .grid-cell.selected .cell-check {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .grid-cell.selected .cell-check::after {
+    content: "";
+    width: 6px; height: 10px;
+    border-right: 2px solid var(--bg);
+    border-bottom: 2px solid var(--bg);
+    transform: rotate(45deg) translate(-1px, -1px);
+  }
+  .grid-cell.full .cell-check { display: none; }
+
+  .selection-status {
+    margin-top: 24px;
+    padding: 16px 20px;
+    background: var(--bg-alt);
+    border-left: 3px solid var(--accent);
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .selection-status strong {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ───────── Confirm ───────── */
+  .confirm-section {
+    margin-bottom: 32px;
+  }
+  .confirm-heading {
+    font-family: var(--font-en);
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .confirm-list {
+    list-style: none;
+  }
+  .confirm-row {
+    display: flex;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule-soft);
+    font-size: 14px;
+  }
+  .confirm-key {
+    width: 140px;
+    color: var(--ink-mute);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+  }
+  .confirm-val {
+    flex: 1;
+    color: var(--ink);
+  }
+
+  /* ───────── Buttons / Nav ───────── */
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .btn {
+    font-family: var(--font-body);
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    padding: 14px 32px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+  .btn-primary {
+    background: var(--bg-deep);
+    color: var(--bg);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--accent);
+  }
+  .btn-primary:disabled {
+    background: var(--ink-mute);
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink-soft);
+    padding: 14px 8px;
+  }
+  .btn-ghost:hover { color: var(--accent); }
+  .btn-ghost::before { content: "← "; }
+
+  /* ───────── Success ───────── */
+  .success-wrap {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .success-mark {
+    width: 64px; height: 64px;
+    border: 1.5px solid var(--accent);
+    border-radius: 50%;
+    margin: 0 auto 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .success-mark::after {
+    content: "";
+    width: 16px; height: 28px;
+    border-right: 2px solid var(--accent);
+    border-bottom: 2px solid var(--accent);
+    transform: rotate(45deg) translate(-2px, -2px);
+  }
+  .success-title {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .success-sub {
+    font-family: var(--font-en);
+    font-size: 14px;
+    font-style: italic;
+    color: var(--ink-mute);
+    margin-bottom: 32px;
+    letter-spacing: 0.1em;
+  }
+  .success-detail {
+    max-width: 480px;
+    margin: 0 auto;
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.9;
+  }
+
+  /* 管理用URLボックス */
+  .manage-link-box {
+    max-width: 520px;
+    margin: 48px auto 0;
+    padding: 28px 32px;
+    background: var(--bg-alt);
+    border-left: 3px solid var(--accent);
+    text-align: left;
+  }
+  .manage-link-label {
+    font-family: var(--font-en);
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .manage-link-desc {
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+  .manage-link-url {
+    font-family: var(--font-en);
+    font-size: 12px;
+    color: var(--ink);
+    padding: 12px 14px;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    margin-bottom: 12px;
+    word-break: break-all;
+    line-height: 1.5;
+  }
+  .btn-copy-url {
+    background: var(--bg-deep);
+    color: var(--bg);
+    border: none;
+    padding: 10px 24px;
+    font-family: inherit;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-copy-url:hover { background: var(--accent); }
+  .btn-copy-url.copied { background: var(--success); }
+
+  /* ───────── Error toast ───────── */
+  .toast {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: var(--danger);
+    color: var(--bg);
+    padding: 14px 28px;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    transition: transform 0.3s ease;
+    z-index: 100;
+    max-width: 90%;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ───────── Mobile ───────── */
+  @media (max-width: 720px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .schedule-grid {
+      grid-template-columns: 80px repeat(3, 1fr);
+      font-size: 13px;
+    }
+    .grid-cell { padding: 12px 8px; min-height: 110px; }
+    .cell-procedure { font-size: 12px; }
+    .cell-desc { display: none; }
+    .progress { font-size: 10px; }
+    .step { padding: 12px 4px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <!-- ───── Header ───── -->
+  <header class="header">
+    <div class="header-en">VANDS & LIAS · Medical Academy</div>
+    <h1 class="header-title">受講申込フォーム</h1>
+    <div class="event-meta">
+      <span><strong>第1回</strong></span>
+      <span>2026.06.28 (日)</span>
+      <span>Vands Clinic 江南院</span>
+      <span>定員 18名</span>
+    </div>
+  </header>
+
+  <!-- ───── Progress ───── -->
+  <div class="progress">
+    <div class="step active" data-step="1"><span class="step-num">01</span>基本情報</div>
+    <div class="step" data-step="2"><span class="step-num">02</span>スケジュール選択</div>
+    <div class="step" data-step="3"><span class="step-num">03</span>確認・確定</div>
+  </div>
+
+  <!-- ═════════════════════ Screen 1: 基本情報 ═════════════════════ -->
+  <section id="screen-1" class="screen active">
+    <div class="screen-header">
+      <div class="screen-num">STEP 01</div>
+      <h2 class="screen-title">参加者情報のご入力</h2>
+      <p class="screen-desc">ご登録のメールアドレス宛に確定通知・座学資料・当日のご案内をお送りします。</p>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-row">
+        <label class="form-label">氏名 <span class="required">必須</span></label>
+        <input class="form-input" id="f-name" placeholder="山田 太郎">
+      </div>
+      <div class="form-row">
+        <label class="form-label">氏名(ふりがな)</label>
+        <input class="form-input" id="f-name-kana" placeholder="やまだ たろう">
+      </div>
+      <div class="form-row">
+        <label class="form-label">メールアドレス <span class="required">必須</span></label>
+        <input class="form-input" id="f-email" type="email" placeholder="example@clinic.jp">
+      </div>
+      <div class="form-row">
+        <label class="form-label">携帯電話 <span class="required">必須</span></label>
+        <input class="form-input" id="f-phone" placeholder="090-0000-0000">
+      </div>
+      <div class="form-row full">
+        <label class="form-label">クリニック名 <span class="required">必須</span></label>
+        <input class="form-input" id="f-clinic" placeholder="○○クリニック">
+      </div>
+      <div class="form-row full">
+        <label class="form-label">職種・資格 <span class="required">必須</span></label>
+        <div class="radio-group">
+          <label class="radio-item">
+            <input type="radio" name="profession" value="doctor_employed">
+            <span class="radio-label">勤務医</span>
+          </label>
+          <label class="radio-item">
+            <input type="radio" name="profession" value="doctor_owner">
+            <span class="radio-label">開業医</span>
+          </label>
+          <label class="radio-item">
+            <input type="radio" name="profession" value="nurse">
+            <span class="radio-label">看護師</span>
+          </label>
+          <label class="radio-item">
+            <input type="radio" name="profession" value="other">
+            <span class="radio-label">その他</span>
+          </label>
+        </div>
+      </div>
+      <div class="form-row full">
+        <label class="form-label">専門領域・関心のある施術(任意)</label>
+        <input class="form-input" id="f-specialty" placeholder="美容皮膚科 / ヒアルロン酸 / ボトックス など">
+      </div>
+      <div class="form-row full">
+        <label class="form-label">紹介者(自動取得)</label>
+        <input class="form-input" id="f-referral" readonly placeholder="紹介者URL経由でない場合は空欄">
+        <div class="ref-hint" id="ref-hint" style="display:none;">紹介者経由でのお申込みを確認しました</div>
+      </div>
+      <div class="form-row full">
+        <label class="form-label">備考・特別なご要望(任意)</label>
+        <textarea class="form-textarea" id="f-notes" placeholder="アレルギー・配慮事項・特定の院長へのリクエストなど"></textarea>
+      </div>
+    </div>
+
+    <div class="nav">
+      <span></span>
+      <button class="btn btn-primary" onclick="goToScreen(2)">次へ進む</button>
+    </div>
+  </section>
+
+  <!-- ═════════════════════ Screen 2: スケジュール選択 ═════════════════════ -->
+  <section id="screen-2" class="screen">
+    <div class="screen-header">
+      <div class="screen-num">STEP 02</div>
+      <h2 class="screen-title">受講スケジュールの選択</h2>
+      <p class="screen-desc">各コマ(1〜3限)で、参加したい教室(A/B/C)を1つずつ選択してください。3教室の同時進行となります。</p>
+    </div>
+
+    <div class="schedule-grid" id="schedule-grid">
+      <!-- ヘッダー -->
+      <div class="grid-head grid-head-time">時間</div>
+      <div class="grid-head">A 室</div>
+      <div class="grid-head">B 室</div>
+      <div class="grid-head">C 室</div>
+      <!-- セッションセルは JS で描画 -->
+    </div>
+
+    <div class="selection-status" id="selection-status">
+      <span id="status-text">1限・2限・3限から各1教室を選んでください</span>
+    </div>
+
+    <div class="nav">
+      <button class="btn btn-ghost" onclick="goToScreen(1)">基本情報に戻る</button>
+      <button class="btn btn-primary" id="btn-to-confirm" onclick="goToScreen(3)" disabled>確認画面へ進む</button>
+    </div>
+  </section>
+
+  <!-- ═════════════════════ Screen 3: 確認 ═════════════════════ -->
+  <section id="screen-3" class="screen">
+    <div class="screen-header">
+      <div class="screen-num">STEP 03</div>
+      <h2 class="screen-title">お申込内容のご確認</h2>
+      <p class="screen-desc">内容に誤りがなければ「予約を確定する」を押してください。確定後、登録メールアドレス宛に受付完了メールをお送りします。</p>
+    </div>
+
+    <div class="confirm-section">
+      <div class="confirm-heading">参加者情報</div>
+      <ul class="confirm-list" id="confirm-info"></ul>
+    </div>
+
+    <div class="confirm-section">
+      <div class="confirm-heading">受講スケジュール</div>
+      <ul class="confirm-list" id="confirm-schedule"></ul>
+    </div>
+
+    <div class="nav">
+      <button class="btn btn-ghost" onclick="goToScreen(2)">スケジュール選択に戻る</button>
+      <button class="btn btn-primary" onclick="submitReservation()">予約を確定する</button>
+    </div>
+  </section>
+
+  <!-- ═════════════════════ Screen 4: 完了 ═════════════════════ -->
+  <section id="screen-success" class="screen">
+    <div class="success-wrap">
+      <div class="success-mark"></div>
+      <h2 class="success-title">お申込ありがとうございました</h2>
+      <p class="success-sub">Your reservation has been confirmed.</p>
+      <div class="success-detail">
+        ご登録のメールアドレス宛に、受付完了メールをお送りしました。<br>
+        開催1週間前(6月21日頃)に座学資料を、前日にリマインダーをお送りします。<br><br>
+        ご質問はメールにてお気軽にお問い合わせください。
+      </div>
+
+      <!-- 管理用URL -->
+      <div class="manage-link-box">
+        <div class="manage-link-label">予約内容の確認・変更</div>
+        <div class="manage-link-desc">下記URLから、ご予約の確認・変更・キャンセルをいつでも行えます。<br>このURLは確認メールにも記載されておりますが、念のためブックマーク保存をおすすめします。</div>
+        <div class="manage-link-url" id="manage-link-url"></div>
+        <button class="btn-copy-url" onclick="copyManageUrl()">URLをコピー</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// モックデータ ─ 本番は Supabase の v_sessions_with_availability から取得
+// ════════════════════════════════════════════════════════════════
+const SESSIONS = [
+  // Slot 1: 8:00-9:00
+  { id: 'S1A', slot: 1, room: 'A', start: '08:00', end: '09:00',
+    doctor: '○○院長 (TBD)', procedure: '涙袋ヒアルロン酸注入',
+    desc: '眼窩下動脈の解剖を踏まえた安全な注入層・テクニック', remaining: 4, capacity: 6 },
+  { id: 'S1B', slot: 1, room: 'B', start: '08:00', end: '09:00',
+    doctor: '○○院長 (TBD)', procedure: 'ボトックスネックリフト',
+    desc: 'プラチスマ筋への注入による若返り効果', remaining: 5, capacity: 6 },
+  { id: 'S1C', slot: 1, room: 'C', start: '08:00', end: '09:00',
+    doctor: '○○院長 (TBD)', procedure: '鼻ヒアルロン酸注入',
+    desc: '韓国式ベクター注入法による自然な鼻形成', remaining: 1, capacity: 6 },
+
+  // Slot 2: 9:10-10:10
+  { id: 'S2A', slot: 2, room: 'A', start: '09:10', end: '10:10',
+    doctor: '○○院長 (TBD)', procedure: '顎ヒアルロン酸注入',
+    desc: 'アゴ形成における製剤選択と注入層の判断', remaining: 6, capacity: 6 },
+  { id: 'S2B', slot: 2, room: 'B', start: '09:10', end: '10:10',
+    doctor: '○○院長 (TBD)', procedure: '顔面ボトックス',
+    desc: '咬筋・前額部・眉間への複合アプローチ', remaining: 0, capacity: 6 },
+  { id: 'S2C', slot: 2, room: 'C', start: '09:10', end: '10:10',
+    doctor: '○○院長 (TBD)', procedure: '法令線ヒアルロン酸',
+    desc: '部位に応じた製剤選択と注入層の判断基準', remaining: 3, capacity: 6 },
+
+  // Slot 3: 10:20-11:20
+  { id: 'S3A', slot: 3, room: 'A', start: '10:20', end: '11:20',
+    doctor: '○○院長 (TBD)', procedure: '唇ヒアルロン酸',
+    desc: '自然なボリュームアップのためのリップ注入', remaining: 6, capacity: 6 },
+  { id: 'S3B', slot: 3, room: 'B', start: '10:20', end: '11:20',
+    doctor: '○○院長 (TBD)', procedure: '糸リフト',
+    desc: 'PDOスレッドによるリフトアップ技術', remaining: 2, capacity: 6 },
+  { id: 'S3C', slot: 3, room: 'C', start: '10:20', end: '11:20',
+    doctor: '○○院長 (TBD)', procedure: 'こめかみヒアルロン酸',
+    desc: '浅側頭動脈を回避する高リスク部位の注入術', remaining: 5, capacity: 6 },
+];
+
+// ════════════════════════════════════════════════════════════════
+// 状態管理
+// ════════════════════════════════════════════════════════════════
+let currentScreen = 1;
+let formData = {};
+let selectedSessions = { 1: null, 2: null, 3: null };
+
+// ────────────── URL パラメータから紹介者ID取得 ──────────────
+(function initRefParam() {
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get('ref');
+  if (ref) {
+    document.getElementById('f-referral').value = ref;
+    document.getElementById('ref-hint').style.display = 'block';
+  }
+})();
+
+// ════════════════════════════════════════════════════════════════
+// スクリーン遷移
+// ════════════════════════════════════════════════════════════════
+function goToScreen(n) {
+  // バリデーション
+  if (n === 2 && !validateScreen1()) return;
+  if (n === 3 && !validateScreen2()) return;
+
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + (n === 4 ? 'success' : n)).classList.add('active');
+
+  document.querySelectorAll('.step').forEach((s, i) => {
+    s.classList.remove('active', 'done');
+    if (i + 1 < n) s.classList.add('done');
+    if (i + 1 === n) s.classList.add('active');
+  });
+
+  currentScreen = n;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (n === 2) renderSchedule();
+  if (n === 3) renderConfirm();
+}
+
+// ════════════════════════════════════════════════════════════════
+// バリデーション
+// ════════════════════════════════════════════════════════════════
+function validateScreen1() {
+  formData.name      = document.getElementById('f-name').value.trim();
+  formData.name_kana = document.getElementById('f-name-kana').value.trim();
+  formData.email     = document.getElementById('f-email').value.trim();
+  formData.phone     = document.getElementById('f-phone').value.trim();
+  formData.clinic    = document.getElementById('f-clinic').value.trim();
+  formData.specialty = document.getElementById('f-specialty').value.trim();
+  formData.referral  = document.getElementById('f-referral').value.trim();
+  formData.notes     = document.getElementById('f-notes').value.trim();
+  formData.profession = document.querySelector('input[name="profession"]:checked')?.value;
+
+  const required = [
+    ['name',  '氏名'],
+    ['email', 'メールアドレス'],
+    ['phone', '携帯電話'],
+    ['clinic','クリニック名'],
+  ];
+  for (const [key, label] of required) {
+    if (!formData[key]) {
+      toast(`${label}を入力してください`);
+      return false;
+    }
+  }
+  if (!formData.profession) {
+    toast('職種・資格を選択してください');
+    return false;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    toast('メールアドレスの形式が正しくありません');
+    return false;
+  }
+  return true;
+}
+
+function validateScreen2() {
+  if (!selectedSessions[1] || !selectedSessions[2] || !selectedSessions[3]) {
+    toast('1限・2限・3限から各1教室ずつ選択してください');
+    return false;
+  }
+  return true;
+}
+
+// ════════════════════════════════════════════════════════════════
+// スケジュールグリッド描画
+// ════════════════════════════════════════════════════════════════
+function renderSchedule() {
+  const grid = document.getElementById('schedule-grid');
+  // ヘッダー行(時間列＋A/B/C)はすでにHTMLにあるので、それ以降を再生成
+  // 既存のセル(ヘッダー以外)を削除
+  while (grid.children.length > 4) grid.removeChild(grid.lastChild);
+
+  for (let slot = 1; slot <= 3; slot++) {
+    const slotSessions = SESSIONS.filter(s => s.slot === slot);
+    const first = slotSessions[0];
+
+    // 時間列
+    const timeCell = document.createElement('div');
+    timeCell.className = 'grid-time';
+    timeCell.innerHTML = `
+      <div class="grid-time-label">${slot}限</div>
+      <div class="grid-time-range">${first.start}<br>—<br>${first.end}</div>
+    `;
+    grid.appendChild(timeCell);
+
+    // A / B / C 各教室
+    for (const room of ['A','B','C']) {
+      const session = slotSessions.find(s => s.room === room);
+      const cell = document.createElement('div');
+      cell.className = 'grid-cell';
+      if (session.remaining <= 0) cell.classList.add('full');
+      if (selectedSessions[slot] === session.id) cell.classList.add('selected');
+
+      const remainClass = session.remaining === 0 ? 'critical'
+                       : session.remaining <= 2 ? 'low' : '';
+
+      cell.innerHTML = `
+        <div class="cell-check"></div>
+        <div class="cell-doctor">${session.doctor}</div>
+        <div class="cell-procedure">${session.procedure}</div>
+        <div class="cell-desc">${session.desc}</div>
+        <div class="cell-remaining">
+          <span class="cell-remaining-num ${remainClass}">${session.remaining}</span>
+          <span class="cell-remaining-label">/ ${session.capacity} 残席</span>
+        </div>
+      `;
+
+      if (session.remaining > 0) {
+        cell.addEventListener('click', () => selectSession(slot, session.id));
+      }
+      grid.appendChild(cell);
+    }
+  }
+
+  updateSelectionStatus();
+}
+
+function selectSession(slot, sessionId) {
+  selectedSessions[slot] = sessionId;
+  renderSchedule();
+}
+
+function updateSelectionStatus() {
+  const filled = Object.values(selectedSessions).filter(Boolean).length;
+  const status = document.getElementById('status-text');
+  const btn    = document.getElementById('btn-to-confirm');
+
+  if (filled === 3) {
+    const parts = [1,2,3].map(slot => {
+      const s = SESSIONS.find(x => x.id === selectedSessions[slot]);
+      return `${slot}限 <strong>${s.room}室</strong> ${s.procedure}`;
+    }).join(' / ');
+    status.innerHTML = `選択完了: ${parts}`;
+    btn.disabled = false;
+  } else {
+    status.innerHTML = `<strong>${filled} / 3</strong> 選択済み — 残り <strong>${3 - filled}</strong> コマを選択してください`;
+    btn.disabled = true;
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// 確認画面描画
+// ════════════════════════════════════════════════════════════════
+function renderConfirm() {
+  const profLabel = {
+    doctor_employed: '勤務医',
+    doctor_owner:    '開業医',
+    nurse:           '看護師',
+    other:           'その他'
+  }[formData.profession];
+
+  const info = document.getElementById('confirm-info');
+  info.innerHTML = `
+    <li class="confirm-row"><div class="confirm-key">氏名</div><div class="confirm-val">${esc(formData.name)} ${formData.name_kana ? `(${esc(formData.name_kana)})` : ''}</div></li>
+    <li class="confirm-row"><div class="confirm-key">メール</div><div class="confirm-val">${esc(formData.email)}</div></li>
+    <li class="confirm-row"><div class="confirm-key">携帯電話</div><div class="confirm-val">${esc(formData.phone)}</div></li>
+    <li class="confirm-row"><div class="confirm-key">クリニック</div><div class="confirm-val">${esc(formData.clinic)}</div></li>
+    <li class="confirm-row"><div class="confirm-key">職種・資格</div><div class="confirm-val">${profLabel}</div></li>
+    ${formData.specialty ? `<li class="confirm-row"><div class="confirm-key">専門領域</div><div class="confirm-val">${esc(formData.specialty)}</div></li>` : ''}
+    ${formData.referral  ? `<li class="confirm-row"><div class="confirm-key">紹介者</div><div class="confirm-val">${esc(formData.referral)}</div></li>` : ''}
+    ${formData.notes     ? `<li class="confirm-row"><div class="confirm-key">備考</div><div class="confirm-val">${esc(formData.notes)}</div></li>` : ''}
+  `;
+
+  const sched = document.getElementById('confirm-schedule');
+  sched.innerHTML = [1,2,3].map(slot => {
+    const s = SESSIONS.find(x => x.id === selectedSessions[slot]);
+    return `<li class="confirm-row">
+      <div class="confirm-key">${slot}限 ${s.start}-${s.end}</div>
+      <div class="confirm-val"><strong>${s.room}室</strong> ${s.procedure} <span style="color:var(--ink-mute); font-size:12px;">/ ${s.doctor}</span></div>
+    </li>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════════════
+// 予約確定 ─ 本番は Supabase RPC reserve_registration を呼ぶ
+// ════════════════════════════════════════════════════════════════
+async function submitReservation() {
+  // ── モックモード(プロトタイプ用) ──
+  // 本番では下記のような Supabase 呼び出しに置き換える:
+  //
+  // const { data, error } = await supabase.rpc('reserve_registration', {
+  //   p_event_id:        EVENT_ID,
+  //   p_name:            formData.name,
+  //   p_name_kana:       formData.name_kana,
+  //   p_email:           formData.email,
+  //   p_phone:           formData.phone,
+  //   p_clinic_name:     formData.clinic,
+  //   p_profession_type: formData.profession,
+  //   p_specialty:       formData.specialty,
+  //   p_referral_code:   formData.referral,
+  //   p_notes:           formData.notes,
+  //   p_session_ids:     Object.values(selectedSessions),
+  // });
+  // if (!data.success) {
+  //   if (data.error === 'sessions_full') {
+  //     toast('選択された枠が満席になりました。再選択をお願いします。');
+  //     await refreshSessions();
+  //     goToScreen(2);
+  //     return;
+  //   }
+  //   toast('予約処理中にエラーが発生しました');
+  //   return;
+  // }
+  // 確定通知メール送信(Supabase Edge Function or Firebase Function)
+
+  // モック: 1秒待って成功画面へ
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = '送信中...';
+
+  await new Promise(r => setTimeout(r, 800));
+
+  // 管理用トークンを生成(本番は Supabase で自動生成)
+  const token = generateMockToken();
+  const manageUrl = `${window.location.origin}${window.location.pathname.replace(/[^\/]*$/, '')}manage.html?token=${token}`;
+  document.getElementById('manage-link-url').textContent = manageUrl;
+  window._manageUrl = manageUrl;
+
+  // コンソールに送信データを出力(開発用)
+  console.log('予約データ:', { ...formData, sessions: selectedSessions, token });
+
+  goToScreen(4);
+}
+
+function generateMockToken() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+function copyManageUrl() {
+  navigator.clipboard.writeText(window._manageUrl).then(() => {
+    const btn = document.querySelector('.btn-copy-url');
+    btn.classList.add('copied');
+    btn.textContent = 'コピー完了 ✓';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.textContent = 'URLをコピー';
+    }, 2000);
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+// ユーティリティ
+// ════════════════════════════════════════════════════════════════
+function esc(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// 初期描画
+renderSchedule();
+</script>
+
+</body>
+</html>
