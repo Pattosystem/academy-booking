@@ -1094,6 +1094,91 @@
   .doctor-select-row .modal-label {
     color: var(--accent);
   }
+
+  /* ═══════════ FAQ admin list ═══════════ */
+  .faq-admin-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .faq-admin-item {
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .faq-admin-item:hover {
+    border-color: var(--primary);
+    background: var(--bg-card);
+  }
+  .faq-admin-item.inactive { opacity: 0.5; }
+  .faq-admin-q {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 6px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .faq-admin-q::before {
+    content: "Q";
+    background: var(--accent);
+    color: #fff;
+    font-family: "Inter", sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .faq-admin-a {
+    font-size: 12px;
+    color: var(--text-2);
+    line-height: 1.6;
+    padding-left: 30px;
+    white-space: pre-wrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  /* ═══════════ Product checkbox list ═══════════ */
+  .product-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.15s;
+  }
+  .product-checkbox-item:hover {
+    border-color: var(--accent);
+    background: var(--accent-2);
+  }
+  .product-checkbox-item input[type="checkbox"] {
+    cursor: pointer;
+  }
+  .product-checkbox-label {
+    flex: 1;
+    color: var(--text);
+  }
+  .product-checkbox-cat {
+    font-size: 10px;
+    color: var(--text-3);
+    font-family: "Inter", sans-serif;
+    padding: 2px 8px;
+    background: var(--bg-soft);
+    border-radius: 100px;
+  }
   .modal-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -1353,8 +1438,14 @@
     <div class="tab" data-view="doctors">
       <span class="tab-num">04</span>講師管理
     </div>
+    <div class="tab" data-view="products">
+      <span class="tab-num">05</span>製剤管理
+    </div>
     <div class="tab" data-view="referrers">
-      <span class="tab-num">05</span>紹介者URL
+      <span class="tab-num">06</span>紹介者URL
+    </div>
+    <div class="tab" data-view="settings">
+      <span class="tab-num">07</span>設定 / Q&amp;A
     </div>
   </div>
 
@@ -1443,7 +1534,19 @@
       <div id="doctors-list" class="doctors-list"></div>
     </section>
 
-    <!-- VIEW 5: Referrers -->
+    <!-- VIEW 5: Products -->
+    <section id="view-products" class="view">
+      <div class="toolbar">
+        <div style="font-size: 13px; color: var(--text-2);">
+          講義で使用する製剤情報を登録します。お客様画面でセッションの「💉 使用製剤」リンクから詳細モーダルが表示されます。
+        </div>
+        <div class="toolbar-spacer"></div>
+        <button class="btn-export" onclick="openProductModal()">+ 製剤を追加</button>
+      </div>
+      <div id="products-list" class="doctors-list"></div>
+    </section>
+
+    <!-- VIEW 6: Referrers -->
     <section id="view-referrers" class="view">
       <table class="ref-table">
         <thead>
@@ -1471,6 +1574,154 @@
       </div>
     </section>
 
+    <!-- VIEW 7: Settings / FAQ -->
+    <section id="view-settings" class="view">
+      <div class="panel" style="margin-bottom: 24px;">
+        <div class="panel-title">アカデミー概要</div>
+        <div class="panel-sub">About — お客様画面トップに表示されます</div>
+        <textarea class="modal-textarea" id="evt-description" rows="6" style="width: 100%; margin-bottom: 12px;" placeholder="VANDS & LIAS Medical Academy は、韓国・Vandsクリニック江南院の各専門領域のスペシャリストが直接指導する、医師向け美容医療カンファレンスです..."></textarea>
+        <div style="text-align: right;">
+          <button class="btn-export" onclick="saveDescription()">アカデミー概要を保存</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+          <div>
+            <div class="panel-title" style="margin-bottom: 4px;">よくある質問 (FAQ)</div>
+            <div class="panel-sub" style="margin-bottom: 0;">Q&amp;A — お客様画面の申込フォーム下部に表示されます</div>
+          </div>
+          <button class="btn-export" onclick="openFaqModal()">+ Q&amp;Aを追加</button>
+        </div>
+        <div id="faq-list" class="faq-admin-list"></div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- Product edit modal -->
+<div class="modal-overlay" id="product-modal">
+  <div class="modal" style="max-width: 640px;">
+    <div class="modal-header">
+      <div class="modal-title" id="pm-title">製剤を追加</div>
+      <div class="modal-subtitle">PRODUCT CATALOG</div>
+    </div>
+
+    <div class="modal-row" style="display: flex; align-items: flex-start; gap: 24px;">
+      <div style="flex-shrink: 0;">
+        <label class="modal-label">製剤画像</label>
+        <div class="dm-photo-wrap" style="width: 160px;">
+          <div class="dm-photo-preview" id="pm-image-preview" style="width: 160px; height: 160px; border-radius: 8px;"></div>
+          <input type="file" id="pm-image-input" accept="image/jpeg,image/png,image/webp" style="display:none;">
+          <button class="dm-photo-btn" onclick="document.getElementById('pm-image-input').click()">
+            画像をアップロード
+          </button>
+          <div class="dm-photo-hint">推奨600×600 / 2MB以内</div>
+          <button class="dm-photo-remove" id="pm-image-remove" onclick="removeProductImage()" style="display:none;">画像を削除</button>
+        </div>
+      </div>
+      <div style="flex: 1; display: flex; flex-direction: column; gap: 12px;">
+        <div>
+          <label class="modal-label">製剤名 <span style="color: var(--danger);">*</span></label>
+          <input class="modal-input" id="pm-name" placeholder="例: ミヒ注射">
+        </div>
+        <div>
+          <label class="modal-label">英語名 <span class="modal-label-hint">(任意)</span></label>
+          <input class="modal-input" id="pm-name-en" placeholder="例: MEEHI">
+        </div>
+        <div>
+          <label class="modal-label">メーカー / 製造元</label>
+          <input class="modal-input" id="pm-manufacturer" placeholder="例: 韓国 ○○製薬">
+        </div>
+        <div>
+          <label class="modal-label">カテゴリ</label>
+          <input class="modal-input" id="pm-category" placeholder="例: スキンブースター / フィラー / ボトックス">
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-row">
+      <label class="modal-label">説明文 <span class="modal-label-hint">(参加者向けに表示)</span></label>
+      <textarea class="modal-textarea" id="pm-description" rows="5" placeholder="製剤の特徴、成分、効果、施術プロトコル、使用部位など"></textarea>
+    </div>
+
+    <div class="modal-row">
+      <label class="modal-label">カタログPDF <span class="modal-label-hint">(任意、10MB以内)</span></label>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <input type="file" id="pm-pdf-input" accept="application/pdf" style="display:none;">
+        <button class="dm-photo-btn" onclick="document.getElementById('pm-pdf-input').click()" style="width: auto;">
+          📄 PDFをアップロード
+        </button>
+        <span id="pm-pdf-name" style="font-size: 12px; color: var(--text-3); flex: 1;">未選択</span>
+        <button class="dm-photo-remove" id="pm-pdf-remove" onclick="removeProductPdf()" style="display:none; padding: 6px 12px;">PDFを削除</button>
+      </div>
+    </div>
+
+    <div class="modal-row two-col">
+      <div>
+        <label class="modal-label">表示順</label>
+        <input class="modal-input" id="pm-order" type="number" value="0">
+      </div>
+      <div>
+        <label class="modal-label">公開状態</label>
+        <select class="modal-select" id="pm-active">
+          <option value="true">公開</option>
+          <option value="false">非公開</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-row" id="pm-delete-row" style="display:none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--rule-soft);">
+      <button class="modal-btn" onclick="deleteProduct()" style="background: transparent; color: var(--danger); border: 1px solid var(--danger);">
+        この製剤を削除する
+      </button>
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="closeProductModal()">キャンセル</button>
+      <button class="modal-btn modal-btn-save" onclick="saveProduct()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ edit modal -->
+<div class="modal-overlay" id="faq-modal">
+  <div class="modal" style="max-width: 560px;">
+    <div class="modal-header">
+      <div class="modal-title" id="fm-title">Q&amp;Aを追加</div>
+      <div class="modal-subtitle">FREQUENTLY ASKED QUESTION</div>
+    </div>
+    <div class="modal-row">
+      <label class="modal-label">質問</label>
+      <textarea class="modal-textarea" id="fm-question" rows="2" placeholder="例: 駐車場はありますか?"></textarea>
+    </div>
+    <div class="modal-row">
+      <label class="modal-label">回答</label>
+      <textarea class="modal-textarea" id="fm-answer" rows="5" placeholder="例: 会場のVands Clinic 江南院には専用駐車場がございます。当日は受付にて駐車券をお渡しします。"></textarea>
+    </div>
+    <div class="modal-row two-col">
+      <div>
+        <label class="modal-label">表示順</label>
+        <input class="modal-input" id="fm-order" type="number" value="0">
+      </div>
+      <div>
+        <label class="modal-label">公開状態</label>
+        <select class="modal-select" id="fm-active">
+          <option value="true">公開</option>
+          <option value="false">非公開</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-row" id="fm-delete-row" style="display:none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--rule-soft);">
+      <button class="modal-btn" onclick="deleteFaq()" style="background: transparent; color: var(--danger); border: 1px solid var(--danger);">
+        このQ&amp;Aを削除する
+      </button>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="closeFaqModal()">キャンセル</button>
+      <button class="modal-btn modal-btn-save" onclick="saveFaq()">保存</button>
+    </div>
   </div>
 </div>
 
@@ -1587,6 +1838,12 @@
       <label class="modal-label">施術概要(参加者向け説明)</label>
       <textarea class="modal-textarea" id="sem-desc" placeholder="解剖学的ポイント・テクニック・注意点など"></textarea>
     </div>
+    <div class="modal-row" style="background: var(--bg-soft); padding: 14px 16px; border-radius: 6px;">
+      <label class="modal-label">💉 使用製剤 <span class="modal-label-hint">(複数選択可)</span></label>
+      <div id="sem-products-list" style="display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; margin-top: 4px;">
+        <div style="font-size: 12px; color: var(--text-3); padding: 8px;">製剤管理タブで製剤を登録してください</div>
+      </div>
+    </div>
     <div class="modal-row two-col">
       <div>
         <label class="modal-label">開始時刻</label>
@@ -1684,10 +1941,18 @@ let SESSIONS = [];
 let REGISTRATIONS = [];
 let REFERRERS = [];
 let DOCTORS = [];
+let PRODUCTS = [];
+let FAQS = [];
 let editingSessionId = null;
 let editingDoctorId = null;
+let editingProductId = null;
+let editingFaqId = null;
 let pendingPhotoFile = null;
 let pendingPhotoDataUrl = null;
+let pendingProductImageFile = null;
+let pendingProductImageDataUrl = null;
+let pendingProductPdfFile = null;
+let pendingProductPdfRemove = false;
 
 const PROFESSION_LABEL = {
   doctor_employed: '勤務医',
@@ -1824,9 +2089,45 @@ async function loadAllData() {
   await loadReferrers();
   // 講師
   await loadDoctors();
+  // 製剤
+  await loadProducts();
+  // FAQ
+  await loadFaqs();
 
   // 描画
   renderDashboard();
+}
+
+async function loadProducts() {
+  const { data, error } = await sb
+    .from('products')
+    .select('*')
+    .order('display_order', { ascending: true })
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Failed to load products:', error);
+    PRODUCTS = [];
+    return;
+  }
+  PRODUCTS = data || [];
+}
+
+async function loadFaqs() {
+  if (!EVENT) { FAQS = []; return; }
+  const { data, error } = await sb
+    .from('faqs')
+    .select('*')
+    .eq('event_id', EVENT.id)
+    .order('display_order', { ascending: true })
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Failed to load faqs:', error);
+    FAQS = [];
+    return;
+  }
+  FAQS = data || [];
 }
 
 async function loadDoctors() {
@@ -1864,6 +2165,7 @@ async function loadSessions() {
     doctor_title: s.doctor_title || '',
     procedure: s.procedure_title || '',
     desc: s.procedure_description || '',
+    product_ids: s.product_ids || [],
     capacity: s.capacity,
     booked: s.booked,
     remaining: s.remaining,
@@ -1938,7 +2240,9 @@ function refreshCurrentView() {
   if (activeTab === 'roster')    renderRoster();
   if (activeTab === 'sessions')  renderSessionGrid();
   if (activeTab === 'doctors')   renderDoctorsList();
+  if (activeTab === 'products')  renderProductsList();
   if (activeTab === 'referrers') renderReferrers();
+  if (activeTab === 'settings')  renderSettings();
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -2345,6 +2649,21 @@ function openSessionEditModal(sessionId) {
   document.getElementById('sem-end').value          = s.end || '';
   document.getElementById('sem-capacity').value     = s.capacity || 6;
 
+  // 使用製剤のチェックボックスを描画
+  const productsList = document.getElementById('sem-products-list');
+  const activeProducts = PRODUCTS.filter(p => p.is_active);
+  if (activeProducts.length === 0) {
+    productsList.innerHTML = '<div style="font-size: 12px; color: var(--text-3); padding: 8px;">製剤管理タブで製剤を登録してください</div>';
+  } else {
+    productsList.innerHTML = activeProducts.map(p => `
+      <label class="product-checkbox-item">
+        <input type="checkbox" value="${p.id}" ${(s.product_ids || []).includes(p.id) ? 'checked' : ''}>
+        <span class="product-checkbox-label">${esc(p.name)}</span>
+        ${p.category ? `<span class="product-checkbox-cat">${esc(p.category)}</span>` : ''}
+      </label>
+    `).join('');
+  }
+
   // 削除/復活ボタンの表示切り替え
   const deactivateBtn  = document.getElementById('sem-deactivate-btn');
   const deactivateHint = document.getElementById('sem-deactivate-hint');
@@ -2423,6 +2742,11 @@ async function saveSessionEdit() {
   const end          = document.getElementById('sem-end').value;
   const capacity     = parseInt(document.getElementById('sem-capacity').value, 10);
 
+  // 製剤IDを収集
+  const product_ids = Array.from(
+    document.querySelectorAll('#sem-products-list input[type="checkbox"]:checked')
+  ).map(cb => cb.value);
+
   if (!capacity || capacity < 1) {
     toast('定員は1以上で入力してください', 'danger');
     return;
@@ -2443,6 +2767,7 @@ async function saveSessionEdit() {
       doctor_title: doctor_title || null,
       procedure_title: procedure || null,
       procedure_description: desc || null,
+      product_ids: product_ids,
       start_time: start || null,
       end_time: end || null,
       capacity: capacity
@@ -2761,6 +3086,445 @@ function onDoctorSelectChange() {
   // 講師情報をフォームに自動入力
   document.getElementById('sem-doctor').value = d.name || '';
   document.getElementById('sem-doctor-title').value = d.title || '';
+}
+
+
+// ════════════════════════════════════════════════════════════════
+// 製剤管理(Products)
+// ════════════════════════════════════════════════════════════════
+function renderProductsList() {
+  const listEl = document.getElementById('products-list');
+  if (PRODUCTS.length === 0) {
+    listEl.innerHTML = `
+      <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--text-3); background: var(--bg); border: 1px dashed var(--rule); border-radius: 8px;">
+        <div style="font-size: 38px; margin-bottom: 12px; opacity: 0.4;">💉</div>
+        <div style="font-size: 14px; margin-bottom: 6px;">まだ製剤が登録されていません</div>
+        <div style="font-size: 12px;">右上の「+ 製剤を追加」ボタンから登録してください</div>
+      </div>
+    `;
+    return;
+  }
+
+  listEl.innerHTML = PRODUCTS.map(p => {
+    const initials = (p.name_en || p.name || '?').slice(0, 2).toUpperCase();
+    const imgHtml = p.image_url
+      ? `<img class="doctor-row-photo" src="${esc(p.image_url)}" alt="${esc(p.name)}" style="border-radius: 8px;">`
+      : `<div class="doctor-row-photo-placeholder" style="border-radius: 8px;">${esc(initials)}</div>`;
+    const pdfBadge = p.catalog_pdf_url ? '<span style="font-size: 10px; padding: 2px 8px; background: var(--accent-2); color: var(--accent); border-radius: 100px; font-family: Inter; font-weight: 600;">PDF</span>' : '';
+
+    return `
+      <div class="doctor-row ${!p.is_active ? 'inactive' : ''}" onclick="openProductModal('${p.id}')">
+        ${imgHtml}
+        <div class="doctor-row-info">
+          <div class="doctor-row-name">${esc(p.name)} ${pdfBadge}</div>
+          <div class="doctor-row-meta">${esc([p.category, p.manufacturer].filter(Boolean).join(' / ')) || '—'}</div>
+          ${p.description ? `<div class="doctor-row-specs">${esc(p.description.slice(0, 80))}${p.description.length > 80 ? '...' : ''}</div>` : ''}
+        </div>
+        <div class="doctor-row-badge ${p.is_active ? 'active' : 'inactive'}">${p.is_active ? '公開' : '非公開'}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openProductModal(productId) {
+  editingProductId = productId || null;
+  pendingProductImageFile = null;
+  pendingProductImageDataUrl = null;
+  pendingProductPdfFile = null;
+  pendingProductPdfRemove = false;
+
+  if (productId) {
+    const p = PRODUCTS.find(x => x.id === productId);
+    if (!p) return;
+    document.getElementById('pm-title').textContent = '製剤情報を編集';
+    document.getElementById('pm-name').value         = p.name || '';
+    document.getElementById('pm-name-en').value      = p.name_en || '';
+    document.getElementById('pm-manufacturer').value = p.manufacturer || '';
+    document.getElementById('pm-category').value     = p.category || '';
+    document.getElementById('pm-description').value  = p.description || '';
+    document.getElementById('pm-order').value        = p.display_order || 0;
+    document.getElementById('pm-active').value       = String(p.is_active);
+    document.getElementById('pm-delete-row').style.display = 'block';
+
+    const preview = document.getElementById('pm-image-preview');
+    if (p.image_url) {
+      preview.style.backgroundImage = `url('${p.image_url}')`;
+      preview.classList.add('has-image');
+      preview.textContent = '';
+      document.getElementById('pm-image-remove').style.display = 'inline-block';
+    } else {
+      preview.style.backgroundImage = '';
+      preview.classList.remove('has-image');
+      preview.textContent = 'No image';
+      document.getElementById('pm-image-remove').style.display = 'none';
+    }
+
+    if (p.catalog_pdf_url) {
+      document.getElementById('pm-pdf-name').textContent = '📄 アップロード済み';
+      document.getElementById('pm-pdf-remove').style.display = 'inline-block';
+    } else {
+      document.getElementById('pm-pdf-name').textContent = '未選択';
+      document.getElementById('pm-pdf-remove').style.display = 'none';
+    }
+  } else {
+    document.getElementById('pm-title').textContent = '製剤を追加';
+    ['pm-name','pm-name-en','pm-manufacturer','pm-category','pm-description'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('pm-order').value        = PRODUCTS.length * 10;
+    document.getElementById('pm-active').value       = 'true';
+    document.getElementById('pm-delete-row').style.display = 'none';
+
+    const preview = document.getElementById('pm-image-preview');
+    preview.style.backgroundImage = '';
+    preview.classList.remove('has-image');
+    preview.textContent = 'No image';
+    document.getElementById('pm-image-remove').style.display = 'none';
+
+    document.getElementById('pm-pdf-name').textContent = '未選択';
+    document.getElementById('pm-pdf-remove').style.display = 'none';
+  }
+
+  document.getElementById('product-modal').classList.add('show');
+}
+
+function closeProductModal() {
+  document.getElementById('product-modal').classList.remove('show');
+  editingProductId = null;
+  pendingProductImageFile = null;
+  pendingProductImageDataUrl = null;
+  pendingProductPdfFile = null;
+  pendingProductPdfRemove = false;
+}
+
+function removeProductImage() {
+  if (!confirm('製剤画像を削除しますか?')) return;
+  pendingProductImageFile = null;
+  pendingProductImageDataUrl = 'REMOVE';
+  const preview = document.getElementById('pm-image-preview');
+  preview.style.backgroundImage = '';
+  preview.classList.remove('has-image');
+  preview.textContent = '削除予定';
+  document.getElementById('pm-image-remove').style.display = 'none';
+}
+
+function removeProductPdf() {
+  if (!confirm('カタログPDFを削除しますか?')) return;
+  pendingProductPdfFile = null;
+  pendingProductPdfRemove = true;
+  document.getElementById('pm-pdf-name').textContent = '削除予定';
+  document.getElementById('pm-pdf-remove').style.display = 'none';
+}
+
+document.getElementById('pm-image-input').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) {
+    toast('画像サイズは2MB以内にしてください', 'danger');
+    return;
+  }
+  pendingProductImageFile = file;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    pendingProductImageDataUrl = ev.target.result;
+    const preview = document.getElementById('pm-image-preview');
+    preview.style.backgroundImage = `url('${ev.target.result}')`;
+    preview.classList.add('has-image');
+    preview.textContent = '';
+    document.getElementById('pm-image-remove').style.display = 'inline-block';
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('pm-pdf-input').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) {
+    toast('PDFサイズは10MB以内にしてください', 'danger');
+    return;
+  }
+  pendingProductPdfFile = file;
+  pendingProductPdfRemove = false;
+  document.getElementById('pm-pdf-name').textContent = '📄 ' + file.name;
+  document.getElementById('pm-pdf-remove').style.display = 'inline-block';
+});
+
+async function uploadProductImage(productId) {
+  if (!pendingProductImageFile) return null;
+  const ext = pendingProductImageFile.name.split('.').pop().toLowerCase();
+  const filename = `${productId}-${Date.now()}.${ext}`;
+  const { error } = await sb.storage
+    .from('product-images')
+    .upload(filename, pendingProductImageFile, {
+      cacheControl: '3600', upsert: true, contentType: pendingProductImageFile.type
+    });
+  if (error) throw error;
+  const { data: { publicUrl } } = sb.storage.from('product-images').getPublicUrl(filename);
+  return publicUrl;
+}
+
+async function uploadProductPdf(productId) {
+  if (!pendingProductPdfFile) return null;
+  const filename = `${productId}-${Date.now()}.pdf`;
+  const { error } = await sb.storage
+    .from('product-catalogs')
+    .upload(filename, pendingProductPdfFile, {
+      cacheControl: '3600', upsert: true, contentType: 'application/pdf'
+    });
+  if (error) throw error;
+  const { data: { publicUrl } } = sb.storage.from('product-catalogs').getPublicUrl(filename);
+  return publicUrl;
+}
+
+async function saveProduct() {
+  const name         = document.getElementById('pm-name').value.trim();
+  const name_en      = document.getElementById('pm-name-en').value.trim();
+  const manufacturer = document.getElementById('pm-manufacturer').value.trim();
+  const category     = document.getElementById('pm-category').value.trim();
+  const description  = document.getElementById('pm-description').value.trim();
+  const order        = parseInt(document.getElementById('pm-order').value, 10) || 0;
+  const is_active    = document.getElementById('pm-active').value === 'true';
+
+  if (!name) {
+    toast('製剤名は必須項目です', 'danger');
+    return;
+  }
+
+  try {
+    let productId = editingProductId;
+    let image_url = null;
+    let catalog_pdf_url = null;
+
+    if (productId) {
+      const existing = PRODUCTS.find(p => p.id === productId);
+      image_url = existing?.image_url || null;
+      catalog_pdf_url = existing?.catalog_pdf_url || null;
+    }
+
+    // 新規作成
+    if (!productId) {
+      const { data: newP, error } = await sb
+        .from('products')
+        .insert({ name, name_en: name_en || null, manufacturer: manufacturer || null,
+                  category: category || null, description: description || null,
+                  display_order: order, is_active })
+        .select()
+        .single();
+      if (error) throw error;
+      productId = newP.id;
+    }
+
+    // 画像アップロード
+    let updateImage = false;
+    if (pendingProductImageFile) {
+      image_url = await uploadProductImage(productId);
+      updateImage = true;
+    } else if (pendingProductImageDataUrl === 'REMOVE') {
+      image_url = null;
+      updateImage = true;
+    }
+
+    // PDFアップロード
+    let updatePdf = false;
+    if (pendingProductPdfFile) {
+      catalog_pdf_url = await uploadProductPdf(productId);
+      updatePdf = true;
+    } else if (pendingProductPdfRemove) {
+      catalog_pdf_url = null;
+      updatePdf = true;
+    }
+
+    // 更新(編集or新規後の画像/PDF反映)
+    const updateData = {
+      name, name_en: name_en || null, manufacturer: manufacturer || null,
+      category: category || null, description: description || null,
+      display_order: order, is_active,
+      updated_at: new Date().toISOString()
+    };
+    if (updateImage) updateData.image_url = image_url;
+    if (updatePdf) updateData.catalog_pdf_url = catalog_pdf_url;
+
+    const { error: updErr } = await sb.from('products').update(updateData).eq('id', productId);
+    if (updErr) throw updErr;
+
+    await loadProducts();
+    renderProductsList();
+    closeProductModal();
+    toast(editingProductId ? '製剤情報を更新しました' : '製剤を登録しました', 'success');
+  } catch (e) {
+    console.error('Save product failed:', e);
+    toast('保存に失敗しました: ' + (e.message || '不明なエラー'), 'danger');
+  }
+}
+
+async function deleteProduct() {
+  if (!editingProductId) return;
+  const p = PRODUCTS.find(x => x.id === editingProductId);
+  if (!p) return;
+
+  if (!confirm(`「${p.name}」を削除します。本当によろしいですか?`)) return;
+
+  // 画像・PDFファイル削除
+  try {
+    if (p.image_url) {
+      const filename = p.image_url.split('/').pop();
+      await sb.storage.from('product-images').remove([filename]);
+    }
+    if (p.catalog_pdf_url) {
+      const filename = p.catalog_pdf_url.split('/').pop();
+      await sb.storage.from('product-catalogs').remove([filename]);
+    }
+  } catch (e) {
+    console.warn('Failed to delete files:', e);
+  }
+
+  // セッションから製剤IDを削除
+  const sessionsToUpdate = SESSIONS.filter(s => (s.product_ids || []).includes(editingProductId));
+  for (const s of sessionsToUpdate) {
+    const newIds = s.product_ids.filter(id => id !== editingProductId);
+    await sb.from('sessions').update({ product_ids: newIds }).eq('id', s.id);
+  }
+
+  const { error } = await sb.from('products').delete().eq('id', editingProductId);
+  if (error) {
+    toast('削除に失敗しました: ' + error.message, 'danger');
+    return;
+  }
+
+  await loadProducts();
+  await loadSessions();
+  renderProductsList();
+  closeProductModal();
+  toast('製剤を削除しました', 'success');
+}
+
+
+// ════════════════════════════════════════════════════════════════
+// FAQ管理
+// ════════════════════════════════════════════════════════════════
+function renderSettings() {
+  // 概要
+  document.getElementById('evt-description').value = EVENT?.description || '';
+  // FAQ
+  renderFaqAdminList();
+}
+
+function renderFaqAdminList() {
+  const listEl = document.getElementById('faq-list');
+  if (FAQS.length === 0) {
+    listEl.innerHTML = `
+      <div style="text-align: center; padding: 40px 20px; color: var(--text-3); border: 1px dashed var(--rule); border-radius: 8px;">
+        <div style="font-size: 32px; margin-bottom: 8px; opacity: 0.4;">❓</div>
+        <div style="font-size: 13px;">まだQ&amp;Aが登録されていません</div>
+      </div>
+    `;
+    return;
+  }
+
+  listEl.innerHTML = FAQS.map(f => `
+    <div class="faq-admin-item ${!f.is_active ? 'inactive' : ''}" onclick="openFaqModal('${f.id}')">
+      <div class="faq-admin-q">${esc(f.question)}</div>
+      <div class="faq-admin-a">${esc(f.answer)}</div>
+    </div>
+  `).join('');
+}
+
+function openFaqModal(faqId) {
+  editingFaqId = faqId || null;
+  if (faqId) {
+    const f = FAQS.find(x => x.id === faqId);
+    if (!f) return;
+    document.getElementById('fm-title').textContent = 'Q&Aを編集';
+    document.getElementById('fm-question').value = f.question || '';
+    document.getElementById('fm-answer').value   = f.answer || '';
+    document.getElementById('fm-order').value    = f.display_order || 0;
+    document.getElementById('fm-active').value   = String(f.is_active);
+    document.getElementById('fm-delete-row').style.display = 'block';
+  } else {
+    document.getElementById('fm-title').textContent = 'Q&Aを追加';
+    document.getElementById('fm-question').value = '';
+    document.getElementById('fm-answer').value   = '';
+    document.getElementById('fm-order').value    = FAQS.length * 10;
+    document.getElementById('fm-active').value   = 'true';
+    document.getElementById('fm-delete-row').style.display = 'none';
+  }
+  document.getElementById('faq-modal').classList.add('show');
+}
+
+function closeFaqModal() {
+  document.getElementById('faq-modal').classList.remove('show');
+  editingFaqId = null;
+}
+
+async function saveFaq() {
+  const question = document.getElementById('fm-question').value.trim();
+  const answer   = document.getElementById('fm-answer').value.trim();
+  const order    = parseInt(document.getElementById('fm-order').value, 10) || 0;
+  const is_active = document.getElementById('fm-active').value === 'true';
+
+  if (!question || !answer) {
+    toast('質問と回答は必須項目です', 'danger');
+    return;
+  }
+  if (!EVENT) {
+    toast('イベントが未設定です', 'danger');
+    return;
+  }
+
+  try {
+    if (editingFaqId) {
+      const { error } = await sb.from('faqs').update({
+        question, answer, display_order: order, is_active,
+        updated_at: new Date().toISOString()
+      }).eq('id', editingFaqId);
+      if (error) throw error;
+      toast('Q&Aを更新しました', 'success');
+    } else {
+      const { error } = await sb.from('faqs').insert({
+        event_id: EVENT.id, question, answer, display_order: order, is_active
+      });
+      if (error) throw error;
+      toast('Q&Aを追加しました', 'success');
+    }
+
+    await loadFaqs();
+    renderFaqAdminList();
+    closeFaqModal();
+  } catch (e) {
+    toast('保存に失敗しました: ' + (e.message || ''), 'danger');
+  }
+}
+
+async function deleteFaq() {
+  if (!editingFaqId) return;
+  if (!confirm('このQ&Aを削除します。よろしいですか?')) return;
+
+  const { error } = await sb.from('faqs').delete().eq('id', editingFaqId);
+  if (error) {
+    toast('削除に失敗しました: ' + error.message, 'danger');
+    return;
+  }
+
+  await loadFaqs();
+  renderFaqAdminList();
+  closeFaqModal();
+  toast('Q&Aを削除しました', 'success');
+}
+
+async function saveDescription() {
+  const description = document.getElementById('evt-description').value.trim();
+  if (!EVENT) return;
+
+  const { error } = await sb
+    .from('events')
+    .update({ description: description || null, updated_at: new Date().toISOString() })
+    .eq('id', EVENT.id);
+
+  if (error) {
+    toast('保存に失敗しました: ' + error.message, 'danger');
+    return;
+  }
+
+  EVENT.description = description || null;
+  toast('アカデミー概要を保存しました', 'success');
 }
 
 
