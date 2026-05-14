@@ -354,6 +354,17 @@
     cursor: not-allowed;
     opacity: 0.7;
   }
+  .sch-cell.deactivated {
+    background: repeating-linear-gradient(
+      45deg,
+      var(--bg-soft),
+      var(--bg-soft) 8px,
+      #F0F0F0 8px,
+      #F0F0F0 16px
+    );
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
   .sch-cell.current::before {
     content: "現在の選択";
     position: absolute;
@@ -551,6 +562,135 @@
     gap: 12px;
   }
 
+  /* ───── Product detail modal ───── */
+  .product-detail-modal {
+    max-width: 560px;
+    width: 100%;
+    padding: 0;
+    overflow: hidden;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .product-detail-header {
+    position: relative;
+    background: var(--bg-soft);
+  }
+  .product-detail-image {
+    width: 100%;
+    height: 280px;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--bg-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-3);
+    font-family: "Inter", sans-serif;
+    font-size: 60px;
+    font-weight: 600;
+  }
+  .product-detail-close {
+    position: absolute;
+    top: 14px; right: 14px;
+    width: 36px; height: 36px;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 22px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    line-height: 1;
+  }
+  .product-detail-close:hover { background: #fff; }
+  .product-detail-body { padding: 28px 32px 32px; }
+  .product-detail-category {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--accent-2);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 100px;
+    margin-bottom: 10px;
+  }
+  .product-detail-name {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 2px;
+  }
+  .product-detail-name-en {
+    font-family: "Inter", sans-serif;
+    font-size: 12px;
+    color: var(--text-3);
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  .product-detail-manufacturer {
+    font-size: 12px;
+    color: var(--text-3);
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .product-detail-description {
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.8;
+    white-space: pre-wrap;
+    margin-bottom: 20px;
+  }
+  .product-detail-pdf { margin-top: 20px; }
+  .pdf-download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    background: var(--primary);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .pdf-download-btn:hover { background: var(--primary-2); }
+
+  /* ───── Products tag in session cell ───── */
+  .cell-products {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+  }
+  .cell-product-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 8px;
+    background: var(--accent-2);
+    color: var(--accent);
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .cell-product-tag:hover {
+    background: var(--accent);
+    color: #fff;
+  }
+  .sch-cell.selected .cell-product-tag {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+  }
+
   /* ───── Toast ───── */
   .toast {
     position: fixed;
@@ -742,6 +882,24 @@
   </div>
 </div>
 
+<!-- 製剤詳細モーダル -->
+<div class="modal-overlay" id="product-detail-modal" onclick="if(event.target===this) closeProductDetail()">
+  <div class="modal product-detail-modal">
+    <div class="product-detail-header">
+      <div class="product-detail-image" id="pd-image"></div>
+      <button class="product-detail-close" onclick="closeProductDetail()">×</button>
+    </div>
+    <div class="product-detail-body">
+      <div class="product-detail-category" id="pd-category"></div>
+      <h2 class="product-detail-name" id="pd-name"></h2>
+      <div class="product-detail-name-en" id="pd-name-en"></div>
+      <div class="product-detail-manufacturer" id="pd-manufacturer"></div>
+      <div class="product-detail-description" id="pd-description"></div>
+      <div class="product-detail-pdf" id="pd-pdf"></div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -761,6 +919,7 @@ const PROFESSION_LABEL = {
 let RESERVATION = null;
 let EVENT = null;
 let SESSIONS = [];
+let PRODUCTS = [];
 let TOKEN = null;
 let currentSelection = {};
 let originalSelection = {};
@@ -819,8 +978,22 @@ async function init() {
     desc: s.procedure_description || '',
     remaining: s.remaining,
     capacity: s.capacity,
-    isReady: !!(s.doctor_name && s.procedure_title)
+    isReady: !!(s.doctor_name && s.procedure_title),
+    is_active: s.is_active !== false,
+    product_ids: s.product_ids || []
   }));
+
+  // 製剤を取得
+  try {
+    const { data: products } = await sb
+      .from('products')
+      .select('*')
+      .eq('is_active', true)
+      .order('display_order', { ascending: true });
+    PRODUCTS = products || [];
+  } catch (e) {
+    PRODUCTS = [];
+  }
 
   // 現状の選択を構築
   // session_ids は JSONB 配列(view から)
@@ -961,8 +1134,9 @@ function renderSchedule() {
 
       const isCurrent  = RESERVATION.status !== 'draft' && originalSelection[slot] === session.id;
       const isSelected = currentSelection[slot] === session.id;
-      const isNotReady = !session.isReady;
-      const isFull     = !isNotReady && !isCurrent && session.remaining <= 0;
+      const isDeactivated = !session.is_active;
+      const isNotReady = !isDeactivated && !session.isReady;
+      const isFull     = !isDeactivated && !isNotReady && !isCurrent && session.remaining <= 0;
 
       const cell = document.createElement('div');
       cell.className = 'sch-cell';
@@ -970,20 +1144,34 @@ function renderSchedule() {
       if (isSelected) cell.classList.add('selected');
       if (isFull) cell.classList.add('full');
       if (isNotReady) cell.classList.add('not-ready');
+      if (isDeactivated) cell.classList.add('deactivated');
 
       const remainClass = session.remaining === 0 ? 'crit'
                        : session.remaining <= 2 ? 'warn' : '';
 
-      if (isNotReady) {
+      if (isDeactivated) {
+        cell.innerHTML = `
+          <div class="cell-proc" style="color: var(--text-3); text-align: center; margin-top: 40px;">
+            — 開催なし —
+          </div>
+        `;
+      } else if (isNotReady) {
         cell.innerHTML = `
           <div class="not-ready-badge">準備中</div>
           <div class="cell-proc" style="color: var(--text-3);">講師・施術内容を準備中です</div>
         `;
       } else {
+        const productTags = (session.product_ids || [])
+          .map(pid => PRODUCTS.find(p => p.id === pid))
+          .filter(Boolean)
+          .map(p => `<span class="cell-product-tag" onclick="event.stopPropagation(); openProductDetail('${p.id}')">💉 ${esc(p.name)}</span>`)
+          .join('');
+
         cell.innerHTML = `
           <div class="cell-tag">${esc(session.doctor)}</div>
           <div class="cell-proc">${esc(session.procedure)}</div>
           <div class="cell-desc">${esc(session.desc)}</div>
+          ${productTags ? `<div class="cell-products">${productTags}</div>` : ''}
           ${!isFull ? `
             <div class="cell-stat">
               <span class="stat-num ${remainClass}">${session.remaining}</span>
@@ -1132,6 +1320,49 @@ async function confirmCancel() {
 
   // 画面を再読み込み
   setTimeout(() => init(), 800);
+}
+
+// ════════════════════════════════════════════════════════════════
+// 製剤詳細モーダル
+// ════════════════════════════════════════════════════════════════
+function openProductDetail(productId) {
+  const p = PRODUCTS.find(x => x.id === productId);
+  if (!p) return;
+
+  const imgEl = document.getElementById('pd-image');
+  if (p.image_url) {
+    imgEl.style.backgroundImage = `url('${p.image_url}')`;
+    imgEl.textContent = '';
+  } else {
+    imgEl.style.backgroundImage = '';
+    imgEl.textContent = (p.name_en || p.name || '?').slice(0, 2).toUpperCase();
+  }
+
+  document.getElementById('pd-category').textContent = p.category || '';
+  document.getElementById('pd-category').style.display = p.category ? 'inline-block' : 'none';
+  document.getElementById('pd-name').textContent = p.name;
+  document.getElementById('pd-name-en').textContent = p.name_en || '';
+  document.getElementById('pd-name-en').style.display = p.name_en ? 'block' : 'none';
+  document.getElementById('pd-manufacturer').textContent = p.manufacturer ? `製造元: ${p.manufacturer}` : '';
+  document.getElementById('pd-manufacturer').style.display = p.manufacturer ? 'block' : 'none';
+  document.getElementById('pd-description').textContent = p.description || '';
+
+  const pdfEl = document.getElementById('pd-pdf');
+  if (p.catalog_pdf_url) {
+    pdfEl.innerHTML = `
+      <a class="pdf-download-btn" href="${esc(p.catalog_pdf_url)}" target="_blank" rel="noopener">
+        📄 カタログPDFをダウンロード
+      </a>
+    `;
+  } else {
+    pdfEl.innerHTML = '';
+  }
+
+  document.getElementById('product-detail-modal').classList.add('show');
+}
+
+function closeProductDetail() {
+  document.getElementById('product-detail-modal').classList.remove('show');
 }
 
 // ════════════════════════════════════════════════════════════════
