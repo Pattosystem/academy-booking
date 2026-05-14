@@ -299,13 +299,33 @@
   }
 
   /* ───── Product detail modal ───── */
+  /* 画面の左上に固定パネルとして表示(オーバーレイモーダルではなく) */
+  #product-detail-modal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    display: none !important;
+    z-index: 1000 !important;
+    background: rgba(11, 30, 63, 0.35) !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    padding: 30px 0 0 30px !important;
+  }
+  #product-detail-modal.show {
+    display: flex !important;
+  }
   .product-detail-modal {
-    max-width: 560px;
-    width: 100%;
-    padding: 0;
-    overflow: hidden;
-    max-height: 90vh;
-    overflow-y: auto;
+    max-width: 420px !important;
+    width: 100% !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    max-height: calc(100vh - 60px) !important;
+    overflow-y: auto !important;
+    border-radius: 12px !important;
+    box-shadow: 0 12px 40px rgba(11, 30, 63, 0.2) !important;
+    margin: 0 !important;
   }
   .product-detail-header {
     position: relative;
@@ -313,7 +333,7 @@
   }
   .product-detail-image {
     width: 100%;
-    height: 280px;
+    height: 200px;
     background-size: cover;
     background-position: center;
     background-color: var(--bg-soft);
@@ -322,7 +342,7 @@
     justify-content: center;
     color: var(--text-3);
     font-family: "Inter", sans-serif;
-    font-size: 60px;
+    font-size: 50px;
     font-weight: 600;
   }
   .product-detail-close {
