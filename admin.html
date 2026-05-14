@@ -655,6 +655,7 @@
   .status-badge.confirmed { background: var(--success-2); color: var(--success); }
   .status-badge.waitlist  { background: var(--warn-2); color: var(--warn); }
   .status-badge.cancelled { background: var(--danger-2); color: var(--danger); }
+  .status-badge.draft     { background: var(--accent-2); color: var(--accent); }
 
   .status-select {
     background: var(--bg);
@@ -1233,6 +1234,7 @@
         </select>
         <select class="filter-select" id="filter-status">
           <option value="">ステータス - すべて</option>
+          <option value="draft">下書き</option>
           <option value="confirmed">確定</option>
           <option value="waitlist">キャンセル待ち</option>
           <option value="cancelled">キャンセル</option>
@@ -1412,6 +1414,7 @@ const PROFESSION_LABEL = {
   other:           'その他',
 };
 const STATUS_LABEL = {
+  draft:     '下書き',
   confirmed: '確定',
   waitlist:  'キャンセル待ち',
   cancelled: 'キャンセル',
@@ -1752,8 +1755,8 @@ function renderDashboard() {
       barPct: null
     },
     {
-      label: 'Waitlist',
-      value: REGISTRATIONS.filter(r => r.status === 'waitlist').length,
+      label: 'Drafts (未確定)',
+      value: REGISTRATIONS.filter(r => r.status === 'draft').length,
       sub: '名',
       barPct: null
     },
@@ -1870,6 +1873,7 @@ function renderRoster() {
         <td style="font-family:'Inter', sans-serif; font-size:11px; color:var(--text-3);">${formatDateTime(r.created_at)}</td>
         <td>
           <select class="status-select" data-id="${r.id}" onchange="updateStatus(this.dataset.id, this.value)">
+            <option value="draft"      ${r.status === 'draft'     ? 'selected' : ''}>下書き</option>
             <option value="confirmed"  ${r.status === 'confirmed' ? 'selected' : ''}>確定</option>
             <option value="waitlist"   ${r.status === 'waitlist'  ? 'selected' : ''}>待ち</option>
             <option value="cancelled"  ${r.status === 'cancelled' ? 'selected' : ''}>キャンセル</option>
