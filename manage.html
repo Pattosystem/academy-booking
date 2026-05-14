@@ -140,6 +140,13 @@
     font-size: 14px; font-weight: 600;
     color: var(--primary);
   }
+  .venue-address {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-3);
+    margin-top: 3px;
+    line-height: 1.4;
+  }
 
   /* ───── Banners ───── */
   .banner {
@@ -865,7 +872,12 @@ function renderAll() {
 
   // イベント情報
   document.getElementById('m-date').textContent  = formatJaDate(EVENT.event_date);
-  document.getElementById('m-venue').textContent = EVENT.venue || '—';
+  if (EVENT.venue_address) {
+    document.getElementById('m-venue').innerHTML =
+      `${esc(EVENT.venue || '—')}<div class="venue-address">${esc(EVENT.venue_address)}</div>`;
+  } else {
+    document.getElementById('m-venue').textContent = EVENT.venue || '—';
+  }
   document.getElementById('nav-info').textContent =
     `${EVENT.title} / ${formatShortDate(EVENT.event_date)}`;
 
