@@ -134,6 +134,52 @@
     line-height: 1.4;
   }
 
+  /* ───── Instructors link ───── */
+  .instructors-link {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 20px;
+    padding: 16px 20px;
+    background: var(--bg);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.15s;
+  }
+  .instructors-link:hover {
+    background: var(--accent-2);
+    box-shadow: 0 4px 12px rgba(220, 72, 102, 0.12);
+    transform: translateY(-1px);
+  }
+  .instructors-link-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .instructors-link-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .instructors-link-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 2px;
+  }
+  .instructors-link-desc {
+    font-size: 11px;
+    color: var(--text-3);
+  }
+  .instructors-link-arrow {
+    font-family: "Inter", sans-serif;
+    font-size: 18px;
+    color: var(--accent);
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
   /* ───── Stepper ───── */
   .stepper {
     display: flex; align-items: center; gap: 12px;
@@ -373,6 +419,17 @@
   .sch-cell.not-ready .cell-proc,
   .sch-cell.not-ready .cell-desc {
     color: var(--text-3);
+  }
+  .sch-cell.deactivated {
+    background: repeating-linear-gradient(
+      45deg,
+      var(--bg-soft),
+      var(--bg-soft) 8px,
+      #F0F0F0 8px,
+      #F0F0F0 16px
+    );
+    cursor: not-allowed;
+    opacity: 0.7;
   }
   .not-ready-badge {
     display: inline-flex;
@@ -715,6 +772,15 @@
         <div class="hero-meta-value">2026年6月21日</div>
       </div>
     </div>
+
+    <a class="instructors-link" href="doctors.html" target="_blank">
+      <span class="instructors-link-icon">👨‍⚕️</span>
+      <span class="instructors-link-text">
+        <span class="instructors-link-label">講師紹介を見る</span>
+        <span class="instructors-link-desc">各院長の経歴・得意な施術を確認できます</span>
+      </span>
+      <span class="instructors-link-arrow">→</span>
+    </a>
   </div>
 
   <div class="stepper">
@@ -968,7 +1034,8 @@ async function loadEventAndSessions() {
     desc: s.procedure_description || '',
     remaining: s.remaining,
     capacity: s.capacity,
-    isReady: !!(s.doctor_name && s.procedure_title)
+    isReady: !!(s.doctor_name && s.procedure_title),
+    is_active: s.is_active !== false
   }));
 
   return true;
@@ -1147,18 +1214,27 @@ function renderSchedule() {
       const cell = document.createElement('div');
       cell.className = 'sch-cell';
 
-      const isNotReady = !session.isReady;
-      const isFull = !isNotReady && session.remaining <= 0;
+      const isDeactivated = !session.is_active;
+      const isNotReady = !isDeactivated && !session.isReady;
+      const isFull = !isDeactivated && !isNotReady && session.remaining <= 0;
       const isSelected = selectedSessions[slot] === session.id;
 
-      if (isNotReady) cell.classList.add('not-ready');
+      if (isDeactivated) cell.classList.add('deactivated');
+      else if (isNotReady) cell.classList.add('not-ready');
       else if (isFull) cell.classList.add('full');
       if (isSelected) cell.classList.add('selected');
 
       const remainClass = session.remaining === 0 ? 'crit'
                        : session.remaining <= 2 ? 'warn' : '';
 
-      if (isNotReady) {
+      if (isDeactivated) {
+        // 削除済みセル
+        cell.innerHTML = `
+          <div class="cell-proc" style="color: var(--text-3); text-align: center; margin-top: 40px;">
+            — 開催なし —
+          </div>
+        `;
+      } else if (isNotReady) {
         // 準備中セル
         cell.innerHTML = `
           <div class="not-ready-badge">準備中</div>
