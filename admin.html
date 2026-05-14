@@ -1371,8 +1371,12 @@
       <input class="modal-input" id="eem-cancel-deadline" type="date">
     </div>
     <div class="modal-row">
-      <label class="modal-label">会場</label>
-      <input class="modal-input" id="eem-venue">
+      <label class="modal-label">会場名</label>
+      <input class="modal-input" id="eem-venue" placeholder="例: Vands Clinic 江南院">
+    </div>
+    <div class="modal-row">
+      <label class="modal-label">会場住所 <span class="modal-label-hint">(参加者画面で表示されます)</span></label>
+      <input class="modal-input" id="eem-venue-address" placeholder="例: 서울특별시 강남구 테헤란로 123 (Tehran-ro 123, Gangnam-gu, Seoul)">
     </div>
     <div class="modal-row">
       <label class="modal-label">ステータス</label>
@@ -1693,8 +1697,11 @@ function updateEventHeader() {
   document.getElementById('event-title-display').textContent = EVENT.title;
   const dateStr = formatJaDate(EVENT.event_date);
   const timeRange = getSessionTimeRange();
+  const venueDisplay = EVENT.venue_address
+    ? `${EVENT.venue || '—'} (${EVENT.venue_address})`
+    : (EVENT.venue || '—');
   document.getElementById('event-detail-display').textContent =
-    `${dateStr}${timeRange ? ' / ' + timeRange : ''} / ${EVENT.venue || '—'}`;
+    `${dateStr}${timeRange ? ' / ' + timeRange : ''} / ${venueDisplay}`;
 
   const statusMap = {
     open:      { text: '申込受付中', color: 'var(--success)' },
@@ -2096,6 +2103,7 @@ function openEventEditModal() {
     ? EVENT.registration_deadline.slice(0,10) : '';
   document.getElementById('eem-cancel-deadline').value = EVENT.cancellation_deadline || '';
   document.getElementById('eem-venue').value           = EVENT.venue || '';
+  document.getElementById('eem-venue-address').value   = EVENT.venue_address || '';
   document.getElementById('eem-status').value          = EVENT.status || 'open';
   document.getElementById('event-edit-modal').classList.add('show');
 }
@@ -2110,10 +2118,11 @@ async function saveEventEdit() {
   const deadline        = document.getElementById('eem-deadline').value;
   const cancelDeadline  = document.getElementById('eem-cancel-deadline').value;
   const venue           = document.getElementById('eem-venue').value.trim();
+  const venueAddress    = document.getElementById('eem-venue-address').value.trim();
   const status          = document.getElementById('eem-status').value;
 
   if (!title || !date || !venue) {
-    toast('イベント名・開催日・会場は必須項目です', 'danger');
+    toast('イベント名・開催日・会場名は必須項目です', 'danger');
     return;
   }
   if (cancelDeadline && cancelDeadline >= date) {
@@ -2129,6 +2138,7 @@ async function saveEventEdit() {
       registration_deadline: deadline ? deadline + 'T23:59:59+09:00' : null,
       cancellation_deadline: cancelDeadline || null,
       venue:                 venue,
+      venue_address:         venueAddress || null,
       status:                status,
       updated_at:            new Date().toISOString()
     })
@@ -2140,7 +2150,7 @@ async function saveEventEdit() {
   }
 
   Object.assign(EVENT, {
-    title, event_date: date, venue, status,
+    title, event_date: date, venue, venue_address: venueAddress || null, status,
     registration_deadline: deadline ? deadline + 'T23:59:59+09:00' : null,
     cancellation_deadline: cancelDeadline || null
   });
