@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>講師紹介 | VANDS & LIAS Medical Academy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<style>
+  :root {
+    --bg:       #FFFFFF;
+    --bg-soft:  #F4F6F9;
+    --bg-card:  #FAFBFC;
+    --primary:  #0B1E3F;
+    --primary-2:#1B345E;
+    --text:     #0B1E3F;
+    --text-2:   #475670;
+    --text-3:   #8C97A8;
+    --accent:   #DC4866;
+    --accent-2: #FFE8ED;
+    --accent-d: #C13855;
+    --rule:     #DDE3EB;
+    --rule-soft:#EEF1F5;
+    --success:  #1A8870;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Noto Sans JP", "Inter", sans-serif;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent-2); color: var(--accent-d); }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 48px clamp(20px, 5vw, 56px) 80px;
+  }
+
+  /* ───── Top nav ───── */
+  .top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 40px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .brand-mark {
+    width: 36px; height: 36px;
+    background: var(--primary); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Inter", sans-serif;
+    font-weight: 700; font-size: 14px;
+    letter-spacing: 0.05em;
+    border-radius: 4px;
+  }
+  .brand-name {
+    font-family: "Inter", sans-serif;
+    font-size: 14px; font-weight: 600;
+    color: var(--primary);
+  }
+  .brand-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+  .nav-info {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px; font-weight: 600;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .nav-info:hover {
+    background: var(--accent-d);
+    box-shadow: 0 4px 12px rgba(220, 72, 102, 0.25);
+  }
+
+  /* ───── Hero ───── */
+  .hero {
+    margin-bottom: 56px;
+    text-align: center;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px;
+    background: var(--accent-2);
+    color: var(--accent);
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.04em;
+    border-radius: 100px;
+    margin-bottom: 20px;
+    font-family: "Inter", sans-serif;
+    text-transform: uppercase;
+  }
+  .hero-title {
+    font-size: clamp(28px, 4.5vw, 40px);
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+  .hero-en {
+    font-family: "Inter", sans-serif;
+    font-size: 12px;
+    color: var(--text-3);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .hero-desc {
+    font-size: 15px;
+    color: var(--text-2);
+    max-width: 640px;
+    margin: 0 auto;
+    line-height: 1.9;
+  }
+
+  /* ───── Loading state ───── */
+  .loading {
+    text-align: center;
+    padding: 80px 20px;
+  }
+  .loading-spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--rule);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 20px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { color: var(--text-3); font-size: 13px; }
+
+  /* ───── Empty state ───── */
+  .empty {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text-3);
+  }
+  .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+  .empty-text { font-size: 14px; }
+
+  /* ───── Doctors grid ───── */
+  .doctors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 28px;
+  }
+  .doctor-card {
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+  }
+  .doctor-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 8px 24px rgba(11, 30, 63, 0.06);
+    transform: translateY(-2px);
+  }
+  .doctor-photo-wrap {
+    background: var(--bg-soft);
+    padding: 32px;
+    display: flex;
+    justify-content: center;
+  }
+  .doctor-photo {
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--rule-soft);
+    border: 3px solid var(--bg);
+    box-shadow: 0 4px 12px rgba(11, 30, 63, 0.08);
+  }
+  .doctor-photo-placeholder {
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--accent-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Inter", sans-serif;
+    font-size: 38px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .doctor-body {
+    padding: 22px 24px 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .doctor-name {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 2px;
+    text-align: center;
+  }
+  .doctor-name-en {
+    font-family: "Inter", sans-serif;
+    font-size: 11px;
+    color: var(--text-3);
+    text-align: center;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .doctor-title {
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .doctor-clinic {
+    font-size: 12px;
+    color: var(--text-3);
+    text-align: center;
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .doctor-section {
+    margin-bottom: 16px;
+  }
+  .doctor-section-label {
+    font-family: "Inter", sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .doctor-bio {
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+  .doctor-specialty-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .doctor-specialty-pill {
+    display: inline-block;
+    padding: 4px 11px;
+    background: var(--accent-2);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 100px;
+  }
+  .doctor-sessions {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .doctor-sessions-label {
+    font-family: "Inter", sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .session-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 6px 0;
+    font-size: 12px;
+  }
+  .session-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--primary);
+    color: #fff;
+    font-family: "Inter", sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+  }
+  .session-procedure {
+    color: var(--text);
+    font-weight: 500;
+    flex: 1;
+  }
+
+  /* ───── CTA Section ───── */
+  .cta-section {
+    margin-top: 64px;
+    padding: 40px 32px;
+    background: var(--bg-soft);
+    border-radius: 12px;
+    text-align: center;
+  }
+  .cta-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+  .cta-desc {
+    font-size: 14px;
+    color: var(--text-2);
+    margin-bottom: 24px;
+  }
+  .cta-btn {
+    display: inline-block;
+    padding: 14px 32px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.15s;
+  }
+  .cta-btn:hover {
+    background: var(--accent-d);
+    box-shadow: 0 4px 12px rgba(220, 72, 102, 0.25);
+  }
+
+  /* ───── Footer ───── */
+  .footer {
+    text-align: center;
+    padding-top: 48px;
+    font-size: 12px;
+    color: var(--text-3);
+  }
+
+  @media (max-width: 720px) {
+    .doctors-grid { grid-template-columns: 1fr; }
+    .top-nav { flex-direction: column; gap: 16px; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="top-nav">
+    <a class="brand" href="./">
+      <div class="brand-mark">VL</div>
+      <div>
+        <div class="brand-name">VANDS &amp; LIAS Medical Academy</div>
+        <div class="brand-sub">韓国×日本 美容医療カンファレンス</div>
+      </div>
+    </a>
+    <a class="nav-info" href="./">← お申込ページに戻る</a>
+  </div>
+
+  <div class="hero">
+    <div class="hero-tag">Instructors</div>
+    <h1 class="hero-title">講師紹介</h1>
+    <div class="hero-en">MEDICAL ACADEMY · INSTRUCTOR PROFILES</div>
+    <p class="hero-desc">韓国・Vandsクリニック江南院の各専門領域のスペシャリストが、最新の美容医療技術と臨床経験をもとに少人数制でご指導します。</p>
+  </div>
+
+  <div id="loading" class="loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">講師情報を読み込んでいます...</div>
+  </div>
+
+  <div id="empty" class="empty" style="display:none;">
+    <div class="empty-icon">📋</div>
+    <div class="empty-text">講師情報を準備中です。<br>しばらくお待ちください。</div>
+  </div>
+
+  <div id="doctors-grid" class="doctors-grid" style="display:none;"></div>
+
+  <div id="cta-section" class="cta-section" style="display:none;">
+    <h2 class="cta-title">受講のお申込みはこちら</h2>
+    <p class="cta-desc">第1回 VANDS &amp; LIAS Medical Academy への参加を受付中です。</p>
+    <a class="cta-btn" href="./">受講申込フォームへ →</a>
+  </div>
+
+  <div class="footer">
+    © 2026 VANDS &amp; LIAS Medical Academy. All rights reserved.
+  </div>
+
+</div>
+
+<script>
+const sb = window.supabase.createClient(
+  window.SUPABASE_CONFIG.url,
+  window.SUPABASE_CONFIG.anonKey
+);
+
+async function init() {
+  // 講師一覧取得
+  const { data: doctors, error: dErr } = await sb
+    .from('doctors')
+    .select('*')
+    .eq('is_active', true)
+    .order('display_order', { ascending: true })
+    .order('created_at', { ascending: true });
+
+  if (dErr) {
+    console.error('Failed to load doctors:', dErr);
+    showEmpty();
+    return;
+  }
+
+  if (!doctors || doctors.length === 0) {
+    showEmpty();
+    return;
+  }
+
+  // 全セッション取得(担当セッションの紐付け表示用)
+  const { data: sessions } = await sb
+    .from('v_sessions_with_availability')
+    .select('*')
+    .eq('is_active', true)
+    .order('slot_number')
+    .order('room');
+
+  const sessionsByDoctor = {};
+  (sessions || []).forEach(s => {
+    if (s.doctor_id) {
+      if (!sessionsByDoctor[s.doctor_id]) sessionsByDoctor[s.doctor_id] = [];
+      sessionsByDoctor[s.doctor_id].push(s);
+    }
+  });
+
+  renderDoctors(doctors, sessionsByDoctor);
+}
+
+function renderDoctors(doctors, sessionsByDoctor) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('doctors-grid').style.display = 'grid';
+  document.getElementById('cta-section').style.display = 'block';
+
+  const html = doctors.map(d => {
+    const initials = (d.name_en || d.name || '?').slice(0, 2).toUpperCase();
+    const photoHtml = d.photo_url
+      ? `<img class="doctor-photo" src="${esc(d.photo_url)}" alt="${esc(d.name)}">`
+      : `<div class="doctor-photo-placeholder">${esc(initials)}</div>`;
+
+    const specialties = (d.specialties || '').split(/[,、]/).map(s => s.trim()).filter(Boolean);
+    const specialtyHtml = specialties.length > 0
+      ? `<div class="doctor-section">
+           <div class="doctor-section-label">Specialties</div>
+           <div class="doctor-specialty-list">
+             ${specialties.map(s => `<span class="doctor-specialty-pill">${esc(s)}</span>`).join('')}
+           </div>
+         </div>`
+      : '';
+
+    const bioHtml = d.bio
+      ? `<div class="doctor-section">
+           <div class="doctor-section-label">Profile</div>
+           <div class="doctor-bio">${esc(d.bio)}</div>
+         </div>`
+      : '';
+
+    const docSessions = sessionsByDoctor[d.id] || [];
+    const sessionsHtml = docSessions.length > 0
+      ? `<div class="doctor-sessions">
+           <div class="doctor-sessions-label">Session Schedule</div>
+           ${docSessions.map(s => `
+             <div class="session-item">
+               <span class="session-tag">${s.slot_number}限 ${s.room}室</span>
+               <span class="session-procedure">${esc(s.procedure_title || '内容調整中')}</span>
+             </div>
+           `).join('')}
+         </div>`
+      : '';
+
+    return `
+      <div class="doctor-card">
+        <div class="doctor-photo-wrap">
+          ${photoHtml}
+        </div>
+        <div class="doctor-body">
+          <div class="doctor-name">${esc(d.name)}</div>
+          ${d.name_en ? `<div class="doctor-name-en">${esc(d.name_en)}</div>` : ''}
+          ${d.title ? `<div class="doctor-title">${esc(d.title)}</div>` : ''}
+          ${d.clinic ? `<div class="doctor-clinic">${esc(d.clinic)}</div>` : ''}
+          ${bioHtml}
+          ${specialtyHtml}
+          ${sessionsHtml}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('doctors-grid').innerHTML = html;
+}
+
+function showEmpty() {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('empty').style.display = 'block';
+  document.getElementById('cta-section').style.display = 'block';
+}
+
+function esc(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
+
+init();
+</script>
+
+</body>
+</html>
