@@ -736,6 +736,30 @@
     min-height: 240px;
     position: relative;
   }
+  .sg-cell.deactivated {
+    background: repeating-linear-gradient(
+      45deg,
+      var(--bg-soft),
+      var(--bg-soft) 10px,
+      #F0F0F0 10px,
+      #F0F0F0 20px
+    );
+    opacity: 0.7;
+  }
+  .deactivated-badge {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-12deg);
+    background: var(--danger);
+    color: #fff;
+    padding: 4px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    border-radius: 4px;
+    z-index: 1;
+    pointer-events: none;
+  }
   .btn-edit-session {
     position: absolute;
     top: 10px; right: 10px;
@@ -935,7 +959,141 @@
   }
   .btn-add:hover { background: var(--accent-d); }
 
-  /* ═══════════ Modal ═══════════ */
+  /* ═══════════ Doctors ═══════════ */
+  .doctors-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 16px;
+  }
+  .doctor-row {
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .doctor-row:hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(11, 30, 63, 0.06);
+  }
+  .doctor-row.inactive {
+    opacity: 0.5;
+    background: var(--bg-soft);
+  }
+  .doctor-row-photo {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--rule-soft);
+    flex-shrink: 0;
+  }
+  .doctor-row-photo-placeholder {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--accent-2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Inter", sans-serif;
+    font-size: 16px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .doctor-row-info { flex: 1; min-width: 0; }
+  .doctor-row-name {
+    font-size: 14px; font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 2px;
+  }
+  .doctor-row-meta {
+    font-size: 11px;
+    color: var(--text-3);
+    margin-bottom: 4px;
+  }
+  .doctor-row-specs {
+    font-size: 11px;
+    color: var(--text-2);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .doctor-row-badge {
+    padding: 3px 8px;
+    border-radius: 100px;
+    font-size: 10px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .doctor-row-badge.active { background: var(--success-2); color: var(--success); }
+  .doctor-row-badge.inactive { background: var(--rule-soft); color: var(--text-3); }
+
+  /* Doctor modal photo */
+  .dm-photo-wrap {
+    width: 180px;
+    text-align: center;
+  }
+  .dm-photo-preview {
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: var(--bg-soft);
+    background-size: cover;
+    background-position: center;
+    margin-bottom: 12px;
+    border: 2px dashed var(--rule);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-3);
+    font-size: 12px;
+  }
+  .dm-photo-preview.has-image {
+    border-style: solid;
+    border-color: var(--accent);
+  }
+  .dm-photo-btn {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 6px;
+    width: 100%;
+    margin-bottom: 6px;
+  }
+  .dm-photo-btn:hover { background: var(--primary-2); }
+  .dm-photo-hint {
+    font-size: 10px;
+    color: var(--text-3);
+    line-height: 1.4;
+  }
+  .dm-photo-remove {
+    background: transparent;
+    color: var(--danger);
+    border: none;
+    padding: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 6px;
+  }
+  .dm-photo-remove:hover { text-decoration: underline; }
+
+  /* ═══════════ Doctor select in session modal ═══════════ */
+  .doctor-select-row {
+    background: var(--accent-2);
+    border-left: 3px solid var(--accent);
+    padding: 14px 16px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+  .doctor-select-row .modal-label {
+    color: var(--accent);
+  }
   .modal-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -1192,8 +1350,11 @@
     <div class="tab" data-view="sessions">
       <span class="tab-num">03</span>コマ別
     </div>
+    <div class="tab" data-view="doctors">
+      <span class="tab-num">04</span>講師管理
+    </div>
     <div class="tab" data-view="referrers">
-      <span class="tab-num">04</span>紹介者URL
+      <span class="tab-num">05</span>紹介者URL
     </div>
   </div>
 
@@ -1270,7 +1431,19 @@
       <div class="session-grid" id="session-grid"></div>
     </section>
 
-    <!-- VIEW 4: Referrers -->
+    <!-- VIEW 4: Doctors -->
+    <section id="view-doctors" class="view">
+      <div class="toolbar">
+        <div style="font-size: 13px; color: var(--text-2);">
+          講師の情報を登録すると、講師紹介ページ(<a href="doctors.html" target="_blank" style="color: var(--accent); text-decoration: none;">/doctors.html</a>)に表示されます。
+        </div>
+        <div class="toolbar-spacer"></div>
+        <button class="btn-export" onclick="openDoctorModal()">+ 講師を追加</button>
+      </div>
+      <div id="doctors-list" class="doctors-list"></div>
+    </section>
+
+    <!-- VIEW 5: Referrers -->
     <section id="view-referrers" class="view">
       <table class="ref-table">
         <thead>
@@ -1301,6 +1474,87 @@
   </div>
 </div>
 
+<!-- Doctor edit modal -->
+<div class="modal-overlay" id="doctor-modal">
+  <div class="modal" style="max-width: 640px;">
+    <div class="modal-header">
+      <div class="modal-title" id="dm-title">講師を追加</div>
+      <div class="modal-subtitle">INSTRUCTOR PROFILE</div>
+    </div>
+
+    <div class="modal-row" style="display: flex; align-items: flex-start; gap: 24px;">
+      <div style="flex-shrink: 0;">
+        <label class="modal-label">顔写真</label>
+        <div class="dm-photo-wrap" id="dm-photo-wrap">
+          <div class="dm-photo-preview" id="dm-photo-preview"></div>
+          <input type="file" id="dm-photo-input" accept="image/jpeg,image/png,image/webp" style="display:none;">
+          <button class="dm-photo-btn" onclick="document.getElementById('dm-photo-input').click()">
+            写真をアップロード
+          </button>
+          <div class="dm-photo-hint">600×600px推奨 / 2MB以内 / JPG・PNG</div>
+          <button class="dm-photo-remove" id="dm-photo-remove" onclick="removeDoctorPhoto()" style="display:none;">写真を削除</button>
+        </div>
+      </div>
+      <div style="flex: 1; display: flex; flex-direction: column; gap: 12px;">
+        <div>
+          <label class="modal-label">院長名 <span class="modal-label-hint">(漢字・ハングル等)</span></label>
+          <input class="modal-input" id="dm-name" placeholder="例: 김민준 / 金 民俊">
+        </div>
+        <div>
+          <label class="modal-label">英語表記 <span class="modal-label-hint">(任意)</span></label>
+          <input class="modal-input" id="dm-name-en" placeholder="例: Dr. Min-jun Kim">
+        </div>
+        <div>
+          <label class="modal-label">役職・肩書き</label>
+          <input class="modal-input" id="dm-title-input" placeholder="例: 院長 / Director">
+        </div>
+        <div>
+          <label class="modal-label">所属クリニック</label>
+          <input class="modal-input" id="dm-clinic" placeholder="例: Vands Clinic 江南院">
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-row">
+      <label class="modal-label">経歴・自己紹介 <span class="modal-label-hint">(参加者向けに表示)</span></label>
+      <textarea class="modal-textarea" id="dm-bio" rows="5" placeholder="出身大学、医師経験年数、専門分野での実績、海外学会発表経験など"></textarea>
+    </div>
+
+    <div class="modal-row">
+      <label class="modal-label">得意な施術 <span class="modal-label-hint">(カンマ区切り、例: 涙袋ヒアル, ボトックス, リフトアップ)</span></label>
+      <input class="modal-input" id="dm-specialties" placeholder="例: ヒアルロン酸注入, ボトックス, 糸リフト, レーザー治療">
+    </div>
+
+    <div class="modal-row two-col">
+      <div>
+        <label class="modal-label">表示順 <span class="modal-label-hint">(小さいほど上)</span></label>
+        <input class="modal-input" id="dm-order" type="number" value="0">
+      </div>
+      <div>
+        <label class="modal-label">公開状態</label>
+        <select class="modal-select" id="dm-active">
+          <option value="true">公開(講師紹介ページに表示)</option>
+          <option value="false">非公開</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-row" id="dm-delete-row" style="display:none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--rule-soft);">
+      <button class="modal-btn" onclick="deleteDoctor()" style="background: transparent; color: var(--danger); border: 1px solid var(--danger);">
+        この講師を削除する
+      </button>
+      <div style="font-size: 11px; color: var(--text-3); margin-top: 6px;">
+        削除すると講師紹介ページから消えます。担当セッションがある場合はセッション側の講師情報も解除されます。
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="closeDoctorModal()">キャンセル</button>
+      <button class="modal-btn modal-btn-save" onclick="saveDoctor()">保存</button>
+    </div>
+  </div>
+</div>
+
 <!-- Session edit modal -->
 <div class="modal-overlay" id="session-edit-modal">
   <div class="modal">
@@ -1308,8 +1562,17 @@
       <div class="modal-title" id="sem-title">セッション編集</div>
       <div class="modal-subtitle" id="sem-subtitle"></div>
     </div>
+    <div class="modal-row doctor-select-row">
+      <label class="modal-label">📋 講師(登録済みから選択)</label>
+      <select class="modal-select" id="sem-doctor-id" onchange="onDoctorSelectChange()">
+        <option value="">— 選択しない / 直接入力する —</option>
+      </select>
+      <div style="font-size: 10px; color: var(--text-2); margin-top: 6px;">
+        ※ 講師管理タブで登録した講師から選択できます。選択すると下記の「院長名」「役職」が自動入力されます。
+      </div>
+    </div>
     <div class="modal-row">
-      <label class="modal-label">院長名</label>
+      <label class="modal-label">院長名 <span class="modal-label-hint">(または直接入力)</span></label>
       <input class="modal-input" id="sem-doctor" placeholder="例: キム院長">
     </div>
     <div class="modal-row">
@@ -1337,6 +1600,17 @@
     <div class="modal-row">
       <label class="modal-label">定員(人数)</label>
       <input class="modal-input" id="sem-capacity" type="number" min="1" max="20">
+    </div>
+    <div class="modal-row" id="sem-deactivate-row" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--rule-soft);">
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <button class="modal-btn" id="sem-deactivate-btn" onclick="toggleSessionActive()"
+          style="background: transparent; color: var(--danger); border: 1px solid var(--danger);">
+          このコマを削除する
+        </button>
+        <div style="font-size: 11px; color: var(--text-3); flex: 1;" id="sem-deactivate-hint">
+          削除しても予約データは残ります。後で復活させることもできます。
+        </div>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="modal-btn modal-btn-cancel" onclick="closeSessionEditModal()">キャンセル</button>
@@ -1409,7 +1683,11 @@ let EVENT = null;
 let SESSIONS = [];
 let REGISTRATIONS = [];
 let REFERRERS = [];
+let DOCTORS = [];
 let editingSessionId = null;
+let editingDoctorId = null;
+let pendingPhotoFile = null;
+let pendingPhotoDataUrl = null;
 
 const PROFESSION_LABEL = {
   doctor_employed: '勤務医',
@@ -1544,9 +1822,26 @@ async function loadAllData() {
   await loadRegistrations();
   // 紹介者
   await loadReferrers();
+  // 講師
+  await loadDoctors();
 
   // 描画
   renderDashboard();
+}
+
+async function loadDoctors() {
+  const { data, error } = await sb
+    .from('doctors')
+    .select('*')
+    .order('display_order', { ascending: true })
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Failed to load doctors:', error);
+    DOCTORS = [];
+    return;
+  }
+  DOCTORS = data || [];
 }
 
 async function loadSessions() {
@@ -1564,13 +1859,15 @@ async function loadSessions() {
     room: s.room,
     start: s.start_time ? s.start_time.slice(0,5) : '',
     end:   s.end_time   ? s.end_time.slice(0,5)   : '',
+    doctor_id: s.doctor_id || null,
     doctor: s.doctor_name || '',
     doctor_title: s.doctor_title || '',
     procedure: s.procedure_title || '',
     desc: s.procedure_description || '',
     capacity: s.capacity,
     booked: s.booked,
-    remaining: s.remaining
+    remaining: s.remaining,
+    is_active: s.is_active !== false
   }));
 }
 
@@ -1640,6 +1937,7 @@ function refreshCurrentView() {
   if (activeTab === 'dashboard') renderDashboard();
   if (activeTab === 'roster')    renderRoster();
   if (activeTab === 'sessions')  renderSessionGrid();
+  if (activeTab === 'doctors')   renderDoctorsList();
   if (activeTab === 'referrers') renderReferrers();
 }
 
@@ -1984,6 +2282,7 @@ function renderSessionGrid() {
       const s = SESSIONS.find(x => x.slot === slot && x.room === room);
       if (!s) { html += '<div class="sg-cell"><div class="sg-empty">未設定</div></div>'; continue; }
 
+      const isDeactivated = !s.is_active;
       const cls = s.remaining === 0 ? 'full' : s.remaining <= 2 ? 'warn' : '';
       const participants = getConfirmed().filter(r => r.sessions.includes(s.id));
       const partsHtml = participants.length > 0
@@ -1999,8 +2298,9 @@ function renderSessionGrid() {
       const procedureDisplay = s.procedure || '施術未設定';
 
       html += `
-        <div class="sg-cell">
+        <div class="sg-cell ${isDeactivated ? 'deactivated' : ''}">
           <button class="btn-edit-session" onclick="openSessionEditModal('${s.id}')">✏ 編集</button>
+          ${isDeactivated ? '<div class="deactivated-badge">削除済み</div>' : ''}
           <div class="sg-cell-header">
             <div class="sg-doctor ${!s.doctor ? 'empty' : ''}">${esc(doctorDisplay)}</div>
             <div class="sg-procedure ${!s.procedure ? 'empty' : ''}">${esc(procedureDisplay)}</div>
@@ -2027,6 +2327,16 @@ function openSessionEditModal(sessionId) {
 
   document.getElementById('sem-title').textContent = `${s.slot}限 ${s.room}室 のセッション編集`;
   document.getElementById('sem-subtitle').textContent = `Session ID: ${s.id.slice(0, 8)}`;
+
+  // 講師ドロップダウンを更新
+  const docSelect = document.getElementById('sem-doctor-id');
+  docSelect.innerHTML = '<option value="">— 選択しない / 直接入力する —</option>'
+    + DOCTORS.filter(d => d.is_active).map(d => `
+        <option value="${d.id}" ${s.doctor_id === d.id ? 'selected' : ''}>
+          ${esc(d.name)}${d.title ? ` (${esc(d.title)})` : ''}
+        </option>
+      `).join('');
+
   document.getElementById('sem-doctor').value       = s.doctor || '';
   document.getElementById('sem-doctor-title').value = s.doctor_title || '';
   document.getElementById('sem-procedure').value    = s.procedure || '';
@@ -2034,6 +2344,24 @@ function openSessionEditModal(sessionId) {
   document.getElementById('sem-start').value        = s.start || '';
   document.getElementById('sem-end').value          = s.end || '';
   document.getElementById('sem-capacity').value     = s.capacity || 6;
+
+  // 削除/復活ボタンの表示切り替え
+  const deactivateBtn  = document.getElementById('sem-deactivate-btn');
+  const deactivateHint = document.getElementById('sem-deactivate-hint');
+  if (s.is_active) {
+    deactivateBtn.textContent = 'このコマを削除する';
+    deactivateBtn.style.color = 'var(--danger)';
+    deactivateBtn.style.borderColor = 'var(--danger)';
+    deactivateHint.textContent = '削除しても予約データは残ります。後で復活させることもできます。';
+    if (s.booked > 0) {
+      deactivateHint.innerHTML = `<strong style="color: var(--warn);">⚠ ${s.booked}名の予約が入っています。削除すると申込者への連絡が必要です。</strong>`;
+    }
+  } else {
+    deactivateBtn.textContent = 'このコマを復活させる';
+    deactivateBtn.style.color = 'var(--success)';
+    deactivateBtn.style.borderColor = 'var(--success)';
+    deactivateHint.textContent = '現在「削除済み」状態です。復活させると申込フォームに再表示されます。';
+  }
 
   document.getElementById('session-edit-modal').classList.add('show');
 }
@@ -2043,9 +2371,50 @@ function closeSessionEditModal() {
   editingSessionId = null;
 }
 
+async function toggleSessionActive() {
+  if (!editingSessionId) return;
+  const s = SESSIONS.find(x => x.id === editingSessionId);
+  if (!s) return;
+
+  const newState = !s.is_active;
+  const action = newState ? '復活' : '削除';
+
+  // 削除する場合、予約がある場合は警告
+  if (!newState && s.booked > 0) {
+    if (!confirm(`このコマには ${s.booked} 名の予約が入っています。\n削除すると申込者に個別連絡が必要になります。本当に削除しますか?`)) {
+      return;
+    }
+  } else if (!newState) {
+    if (!confirm(`${s.slot}限 ${s.room}室のコマを削除します。\nお客様画面から非表示になります。続行しますか?`)) {
+      return;
+    }
+  } else {
+    if (!confirm(`${s.slot}限 ${s.room}室のコマを復活させます。\nお客様画面に再表示されます。続行しますか?`)) {
+      return;
+    }
+  }
+
+  const { error } = await sb
+    .from('sessions')
+    .update({ is_active: newState })
+    .eq('id', editingSessionId);
+
+  if (error) {
+    toast(`${action}に失敗しました: ${error.message}`, 'danger');
+    return;
+  }
+
+  closeSessionEditModal();
+  await loadSessions();
+  renderSessionGrid();
+  renderDashboard();
+  toast(`${s.slot}限 ${s.room}室のコマを${action}しました`, 'success');
+}
+
 async function saveSessionEdit() {
   if (!editingSessionId) return;
 
+  const doctor_id    = document.getElementById('sem-doctor-id').value || null;
   const doctor       = document.getElementById('sem-doctor').value.trim();
   const doctor_title = document.getElementById('sem-doctor-title').value.trim();
   const procedure    = document.getElementById('sem-procedure').value.trim();
@@ -2069,6 +2438,7 @@ async function saveSessionEdit() {
   const { error } = await sb
     .from('sessions')
     .update({
+      doctor_id: doctor_id,
       doctor_name: doctor || null,
       doctor_title: doctor_title || null,
       procedure_title: procedure || null,
@@ -2091,6 +2461,308 @@ async function saveSessionEdit() {
   updateEventHeader();
   toast('セッション情報を更新しました', 'success');
 }
+
+// ════════════════════════════════════════════════════════════════
+// 講師管理(Doctors)
+// ════════════════════════════════════════════════════════════════
+function renderDoctorsList() {
+  const listEl = document.getElementById('doctors-list');
+  if (DOCTORS.length === 0) {
+    listEl.innerHTML = `
+      <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--text-3); background: var(--bg); border: 1px dashed var(--rule); border-radius: 8px;">
+        <div style="font-size: 38px; margin-bottom: 12px; opacity: 0.4;">📋</div>
+        <div style="font-size: 14px; margin-bottom: 6px;">まだ講師が登録されていません</div>
+        <div style="font-size: 12px;">右上の「+ 講師を追加」ボタンから登録してください</div>
+      </div>
+    `;
+    return;
+  }
+
+  listEl.innerHTML = DOCTORS.map(d => {
+    const initials = (d.name_en || d.name || '?').slice(0, 2).toUpperCase();
+    const photoHtml = d.photo_url
+      ? `<img class="doctor-row-photo" src="${esc(d.photo_url)}" alt="${esc(d.name)}">`
+      : `<div class="doctor-row-photo-placeholder">${esc(initials)}</div>`;
+    const meta = [d.title, d.clinic].filter(Boolean).join(' / ');
+
+    return `
+      <div class="doctor-row ${!d.is_active ? 'inactive' : ''}" onclick="openDoctorModal('${d.id}')">
+        ${photoHtml}
+        <div class="doctor-row-info">
+          <div class="doctor-row-name">${esc(d.name)}${d.name_en ? `<span style="font-family:'Inter'; font-size:11px; font-weight:400; color:var(--text-3); margin-left:8px;">${esc(d.name_en)}</span>` : ''}</div>
+          <div class="doctor-row-meta">${esc(meta) || '—'}</div>
+          ${d.specialties ? `<div class="doctor-row-specs">${esc(d.specialties)}</div>` : ''}
+        </div>
+        <div class="doctor-row-badge ${d.is_active ? 'active' : 'inactive'}">${d.is_active ? '公開' : '非公開'}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openDoctorModal(doctorId) {
+  editingDoctorId = doctorId || null;
+  pendingPhotoFile = null;
+  pendingPhotoDataUrl = null;
+
+  if (doctorId) {
+    const d = DOCTORS.find(x => x.id === doctorId);
+    if (!d) return;
+    document.getElementById('dm-title').textContent = '講師情報を編集';
+    document.getElementById('dm-name').value         = d.name || '';
+    document.getElementById('dm-name-en').value      = d.name_en || '';
+    document.getElementById('dm-title-input').value  = d.title || '';
+    document.getElementById('dm-clinic').value       = d.clinic || '';
+    document.getElementById('dm-bio').value          = d.bio || '';
+    document.getElementById('dm-specialties').value  = d.specialties || '';
+    document.getElementById('dm-order').value        = d.display_order || 0;
+    document.getElementById('dm-active').value       = String(d.is_active);
+    document.getElementById('dm-delete-row').style.display = 'block';
+
+    const preview = document.getElementById('dm-photo-preview');
+    if (d.photo_url) {
+      preview.style.backgroundImage = `url('${d.photo_url}')`;
+      preview.classList.add('has-image');
+      preview.textContent = '';
+      document.getElementById('dm-photo-remove').style.display = 'inline-block';
+    } else {
+      preview.style.backgroundImage = '';
+      preview.classList.remove('has-image');
+      preview.textContent = 'No photo';
+      document.getElementById('dm-photo-remove').style.display = 'none';
+    }
+  } else {
+    // 新規追加
+    document.getElementById('dm-title').textContent = '講師を追加';
+    document.getElementById('dm-name').value         = '';
+    document.getElementById('dm-name-en').value      = '';
+    document.getElementById('dm-title-input').value  = '';
+    document.getElementById('dm-clinic').value       = '';
+    document.getElementById('dm-bio').value          = '';
+    document.getElementById('dm-specialties').value  = '';
+    document.getElementById('dm-order').value        = DOCTORS.length * 10;
+    document.getElementById('dm-active').value       = 'true';
+    document.getElementById('dm-delete-row').style.display = 'none';
+
+    const preview = document.getElementById('dm-photo-preview');
+    preview.style.backgroundImage = '';
+    preview.classList.remove('has-image');
+    preview.textContent = 'No photo';
+    document.getElementById('dm-photo-remove').style.display = 'none';
+  }
+
+  document.getElementById('doctor-modal').classList.add('show');
+}
+
+function closeDoctorModal() {
+  document.getElementById('doctor-modal').classList.remove('show');
+  editingDoctorId = null;
+  pendingPhotoFile = null;
+  pendingPhotoDataUrl = null;
+}
+
+function removeDoctorPhoto() {
+  if (!confirm('顔写真を削除しますか?(変更を保存ボタンを押した時点で確定されます)')) return;
+  pendingPhotoFile = null;
+  pendingPhotoDataUrl = 'REMOVE';  // 削除フラグ
+  const preview = document.getElementById('dm-photo-preview');
+  preview.style.backgroundImage = '';
+  preview.classList.remove('has-image');
+  preview.textContent = '削除予定';
+  document.getElementById('dm-photo-remove').style.display = 'none';
+}
+
+// 写真選択時のプレビュー
+document.getElementById('dm-photo-input').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  if (file.size > 2 * 1024 * 1024) {
+    toast('画像サイズは2MB以内にしてください', 'danger');
+    return;
+  }
+
+  pendingPhotoFile = file;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    pendingPhotoDataUrl = ev.target.result;
+    const preview = document.getElementById('dm-photo-preview');
+    preview.style.backgroundImage = `url('${ev.target.result}')`;
+    preview.classList.add('has-image');
+    preview.textContent = '';
+    document.getElementById('dm-photo-remove').style.display = 'inline-block';
+  };
+  reader.readAsDataURL(file);
+});
+
+async function uploadDoctorPhoto(doctorId) {
+  if (!pendingPhotoFile) return null;
+  const ext = pendingPhotoFile.name.split('.').pop().toLowerCase();
+  const filename = `${doctorId}-${Date.now()}.${ext}`;
+
+  const { data, error } = await sb.storage
+    .from('doctor-photos')
+    .upload(filename, pendingPhotoFile, {
+      cacheControl: '3600',
+      upsert: true,
+      contentType: pendingPhotoFile.type
+    });
+
+  if (error) {
+    console.error('Photo upload failed:', error);
+    throw error;
+  }
+
+  const { data: { publicUrl } } = sb.storage
+    .from('doctor-photos')
+    .getPublicUrl(filename);
+
+  return publicUrl;
+}
+
+async function saveDoctor() {
+  const name        = document.getElementById('dm-name').value.trim();
+  const name_en     = document.getElementById('dm-name-en').value.trim();
+  const title       = document.getElementById('dm-title-input').value.trim();
+  const clinic      = document.getElementById('dm-clinic').value.trim();
+  const bio         = document.getElementById('dm-bio').value.trim();
+  const specialties = document.getElementById('dm-specialties').value.trim();
+  const order       = parseInt(document.getElementById('dm-order').value, 10) || 0;
+  const is_active   = document.getElementById('dm-active').value === 'true';
+
+  if (!name) {
+    toast('院長名は必須項目です', 'danger');
+    return;
+  }
+
+  let photo_url = null;
+  let updatePhoto = false;
+
+  // 編集モードの場合は既存の写真URLを取得
+  if (editingDoctorId) {
+    const existing = DOCTORS.find(d => d.id === editingDoctorId);
+    photo_url = existing?.photo_url || null;
+  }
+
+  try {
+    // 新規写真がある場合はアップロード(編集ならIDを使う、新規なら一時IDを生成)
+    if (pendingPhotoFile) {
+      // 編集時はそのIDで、新規時は新しいレコードを作ってからアップロード
+      if (editingDoctorId) {
+        photo_url = await uploadDoctorPhoto(editingDoctorId);
+        updatePhoto = true;
+      } else {
+        // 新規作成の場合は先にレコードを作ってから写真をアップロード
+        const { data: newDoc, error: insertErr } = await sb
+          .from('doctors')
+          .insert({
+            name, name_en: name_en || null, title: title || null, clinic: clinic || null,
+            bio: bio || null, specialties: specialties || null,
+            display_order: order, is_active: is_active
+          })
+          .select()
+          .single();
+
+        if (insertErr) throw insertErr;
+
+        photo_url = await uploadDoctorPhoto(newDoc.id);
+        await sb.from('doctors').update({ photo_url }).eq('id', newDoc.id);
+
+        await loadDoctors();
+        renderDoctorsList();
+        closeDoctorModal();
+        toast('講師を登録しました', 'success');
+        return;
+      }
+    } else if (pendingPhotoDataUrl === 'REMOVE') {
+      photo_url = null;
+      updatePhoto = true;
+    }
+
+    // 編集または写真なし新規
+    if (editingDoctorId) {
+      const updateData = {
+        name, name_en: name_en || null, title: title || null, clinic: clinic || null,
+        bio: bio || null, specialties: specialties || null,
+        display_order: order, is_active: is_active,
+        updated_at: new Date().toISOString()
+      };
+      if (updatePhoto) updateData.photo_url = photo_url;
+
+      const { error } = await sb.from('doctors').update(updateData).eq('id', editingDoctorId);
+      if (error) throw error;
+
+      toast('講師情報を更新しました', 'success');
+    } else {
+      const { error } = await sb.from('doctors').insert({
+        name, name_en: name_en || null, title: title || null, clinic: clinic || null,
+        bio: bio || null, specialties: specialties || null,
+        display_order: order, is_active: is_active
+      });
+      if (error) throw error;
+
+      toast('講師を登録しました', 'success');
+    }
+
+    await loadDoctors();
+    renderDoctorsList();
+    closeDoctorModal();
+  } catch (e) {
+    console.error('Save doctor failed:', e);
+    toast('保存に失敗しました: ' + (e.message || '不明なエラー'), 'danger');
+  }
+}
+
+async function deleteDoctor() {
+  if (!editingDoctorId) return;
+  const d = DOCTORS.find(x => x.id === editingDoctorId);
+  if (!d) return;
+
+  // 担当セッションを確認
+  const linkedSessions = SESSIONS.filter(s => s.doctor_id === editingDoctorId);
+  let confirmMsg = `「${d.name}」を削除します。本当によろしいですか?`;
+  if (linkedSessions.length > 0) {
+    confirmMsg += `\n\n⚠ 担当中のセッションが ${linkedSessions.length} 件あります。これらのセッションは「講師未設定」状態に戻ります。`;
+  }
+  if (!confirm(confirmMsg)) return;
+
+  // 写真ファイルを削除(あれば)
+  if (d.photo_url) {
+    try {
+      const filename = d.photo_url.split('/').pop();
+      await sb.storage.from('doctor-photos').remove([filename]);
+    } catch (e) {
+      console.warn('Failed to delete photo file:', e);
+    }
+  }
+
+  const { error } = await sb.from('doctors').delete().eq('id', editingDoctorId);
+  if (error) {
+    toast('削除に失敗しました: ' + error.message, 'danger');
+    return;
+  }
+
+  await loadDoctors();
+  await loadSessions();
+  renderDoctorsList();
+  closeDoctorModal();
+  toast('講師を削除しました', 'success');
+}
+
+// セッション編集モーダルで講師ドロップダウンが変更された時
+function onDoctorSelectChange() {
+  const select = document.getElementById('sem-doctor-id');
+  const doctorId = select.value;
+  if (!doctorId) {
+    // 「選択しない」を選んだ場合 → 入力欄をクリアしない(手入力を尊重)
+    return;
+  }
+  const d = DOCTORS.find(x => x.id === doctorId);
+  if (!d) return;
+  // 講師情報をフォームに自動入力
+  document.getElementById('sem-doctor').value = d.name || '';
+  document.getElementById('sem-doctor-title').value = d.title || '';
+}
+
 
 // ════════════════════════════════════════════════════════════════
 // イベント編集モーダル
