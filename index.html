@@ -180,6 +180,263 @@
     flex-shrink: 0;
   }
 
+  /* ───── About section ───── */
+  .about-section {
+    margin-top: 40px;
+    padding: 36px 40px;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+  }
+  .about-eyebrow {
+    font-family: "Inter", sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .about-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 18px;
+  }
+  .about-body {
+    font-size: 14px;
+    color: var(--text-2);
+    line-height: 1.9;
+    white-space: pre-wrap;
+  }
+
+  /* ───── FAQ section ───── */
+  .faq-section {
+    margin-top: 56px;
+    padding: 36px 40px;
+    background: var(--bg-soft);
+    border-radius: 12px;
+  }
+  .faq-eyebrow {
+    font-family: "Inter", sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .faq-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 24px;
+  }
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .faq-item {
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.15s;
+  }
+  .faq-item.open {
+    border-color: var(--accent);
+  }
+  .faq-q {
+    padding: 18px 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary);
+    transition: all 0.15s;
+  }
+  .faq-q:hover {
+    background: var(--bg-card);
+  }
+  .faq-q-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--accent);
+    color: #fff;
+    font-family: "Inter", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .faq-q-text { flex: 1; }
+  .faq-toggle {
+    font-size: 20px;
+    color: var(--text-3);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  .faq-item.open .faq-toggle { transform: rotate(45deg); color: var(--accent); }
+  .faq-a {
+    padding: 0 22px 0 62px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.8;
+    white-space: pre-wrap;
+  }
+  .faq-item.open .faq-a {
+    max-height: 1000px;
+    padding: 0 22px 20px 62px;
+  }
+
+  /* ───── Product detail modal ───── */
+  .product-detail-modal {
+    max-width: 560px;
+    width: 100%;
+    padding: 0;
+    overflow: hidden;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .product-detail-header {
+    position: relative;
+    background: var(--bg-soft);
+  }
+  .product-detail-image {
+    width: 100%;
+    height: 280px;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--bg-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-3);
+    font-family: "Inter", sans-serif;
+    font-size: 60px;
+    font-weight: 600;
+  }
+  .product-detail-close {
+    position: absolute;
+    top: 14px; right: 14px;
+    width: 36px; height: 36px;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 22px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    line-height: 1;
+  }
+  .product-detail-close:hover { background: #fff; }
+  .product-detail-body {
+    padding: 28px 32px 32px;
+  }
+  .product-detail-category {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--accent-2);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 100px;
+    margin-bottom: 10px;
+  }
+  .product-detail-name {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 2px;
+  }
+  .product-detail-name-en {
+    font-family: "Inter", sans-serif;
+    font-size: 12px;
+    color: var(--text-3);
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  .product-detail-manufacturer {
+    font-size: 12px;
+    color: var(--text-3);
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .product-detail-description {
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.8;
+    white-space: pre-wrap;
+    margin-bottom: 20px;
+  }
+  .product-detail-pdf {
+    margin-top: 20px;
+  }
+  .pdf-download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    background: var(--primary);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .pdf-download-btn:hover {
+    background: var(--primary-2);
+  }
+
+  /* ───── Products tag in session cell ───── */
+  .cell-products {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+  }
+  .cell-product-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 8px;
+    background: var(--accent-2);
+    color: var(--accent);
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .cell-product-tag:hover {
+    background: var(--accent);
+    color: #fff;
+  }
+  .sch-cell.selected .cell-product-tag {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+  }
+  .sch-cell.selected .cell-product-tag:hover {
+    background: #fff;
+    color: var(--accent);
+  }
+
   /* ───── Stepper ───── */
   .stepper {
     display: flex; align-items: center; gap: 12px;
@@ -783,6 +1040,13 @@
     </a>
   </div>
 
+  <!-- アカデミー概要 -->
+  <section id="about-section" class="about-section" style="display:none;">
+    <div class="about-eyebrow">ABOUT</div>
+    <h2 class="about-title">VANDS &amp; LIAS Medical Academy について</h2>
+    <div class="about-body" id="about-body"></div>
+  </section>
+
   <div class="stepper">
     <div class="step active" data-step="1">
       <div class="step-circle">1</div>
@@ -958,10 +1222,35 @@
     </div>
   </section>
 
+  <!-- FAQ -->
+  <section id="faq-section" class="faq-section" style="display:none;">
+    <div class="faq-eyebrow">FAQ</div>
+    <h2 class="faq-title">よくある質問</h2>
+    <div class="faq-list" id="faq-list"></div>
+  </section>
+
   <div class="footer">
     © 2026 VANDS &amp; LIAS Medical Academy. All rights reserved.
   </div>
 
+</div>
+
+<!-- 製剤詳細モーダル -->
+<div class="modal-overlay" id="product-detail-modal" onclick="if(event.target===this) closeProductDetail()">
+  <div class="modal product-detail-modal">
+    <div class="product-detail-header">
+      <div class="product-detail-image" id="pd-image"></div>
+      <button class="product-detail-close" onclick="closeProductDetail()">×</button>
+    </div>
+    <div class="product-detail-body">
+      <div class="product-detail-category" id="pd-category"></div>
+      <h2 class="product-detail-name" id="pd-name"></h2>
+      <div class="product-detail-name-en" id="pd-name-en"></div>
+      <div class="product-detail-manufacturer" id="pd-manufacturer"></div>
+      <div class="product-detail-description" id="pd-description"></div>
+      <div class="product-detail-pdf" id="pd-pdf"></div>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -981,6 +1270,8 @@ const sb = window.supabase.createClient(
 // グローバル状態
 // ════════════════════════════════════════════════════════════════
 let SESSIONS = [];
+let PRODUCTS = [];
+let FAQS = [];
 let EVENT_ID = null;
 let EVENT_INFO = null;
 let currentScreen = 1;
@@ -1035,10 +1326,116 @@ async function loadEventAndSessions() {
     remaining: s.remaining,
     capacity: s.capacity,
     isReady: !!(s.doctor_name && s.procedure_title),
-    is_active: s.is_active !== false
+    is_active: s.is_active !== false,
+    product_ids: s.product_ids || []
   }));
 
+  // 製剤を取得(エラーは無視: テーブル未作成時の互換性)
+  try {
+    const { data: products } = await sb
+      .from('products')
+      .select('*')
+      .eq('is_active', true)
+      .order('display_order', { ascending: true });
+    PRODUCTS = products || [];
+  } catch (e) {
+    console.warn('Products not available:', e);
+    PRODUCTS = [];
+  }
+
+  // FAQ を取得
+  try {
+    const { data: faqs } = await sb
+      .from('faqs')
+      .select('*')
+      .eq('event_id', EVENT_ID)
+      .eq('is_active', true)
+      .order('display_order', { ascending: true });
+    FAQS = faqs || [];
+  } catch (e) {
+    console.warn('FAQs not available:', e);
+    FAQS = [];
+  }
+
+  // アカデミー概要 + FAQ を描画
+  renderAboutSection();
+  renderFaqSection();
+
   return true;
+}
+
+function renderAboutSection() {
+  if (EVENT_INFO?.description) {
+    document.getElementById('about-body').textContent = EVENT_INFO.description;
+    document.getElementById('about-section').style.display = 'block';
+  } else {
+    document.getElementById('about-section').style.display = 'none';
+  }
+}
+
+function renderFaqSection() {
+  if (!FAQS || FAQS.length === 0) {
+    document.getElementById('faq-section').style.display = 'none';
+    return;
+  }
+  const listEl = document.getElementById('faq-list');
+  listEl.innerHTML = FAQS.map((f, idx) => `
+    <div class="faq-item" data-idx="${idx}">
+      <div class="faq-q" onclick="toggleFaq(${idx})">
+        <span class="faq-q-mark">Q</span>
+        <span class="faq-q-text">${esc(f.question)}</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-a">${esc(f.answer)}</div>
+    </div>
+  `).join('');
+  document.getElementById('faq-section').style.display = 'block';
+}
+
+function toggleFaq(idx) {
+  const item = document.querySelector(`.faq-item[data-idx="${idx}"]`);
+  if (item) item.classList.toggle('open');
+}
+
+// 製剤詳細モーダル
+function openProductDetail(productId) {
+  const p = PRODUCTS.find(x => x.id === productId);
+  if (!p) return;
+
+  const imgEl = document.getElementById('pd-image');
+  if (p.image_url) {
+    imgEl.style.backgroundImage = `url('${p.image_url}')`;
+    imgEl.textContent = '';
+  } else {
+    imgEl.style.backgroundImage = '';
+    imgEl.textContent = (p.name_en || p.name || '?').slice(0, 2).toUpperCase();
+  }
+
+  document.getElementById('pd-category').textContent = p.category || '';
+  document.getElementById('pd-category').style.display = p.category ? 'inline-block' : 'none';
+  document.getElementById('pd-name').textContent = p.name;
+  document.getElementById('pd-name-en').textContent = p.name_en || '';
+  document.getElementById('pd-name-en').style.display = p.name_en ? 'block' : 'none';
+  document.getElementById('pd-manufacturer').textContent = p.manufacturer ? `製造元: ${p.manufacturer}` : '';
+  document.getElementById('pd-manufacturer').style.display = p.manufacturer ? 'block' : 'none';
+  document.getElementById('pd-description').textContent = p.description || '';
+
+  const pdfEl = document.getElementById('pd-pdf');
+  if (p.catalog_pdf_url) {
+    pdfEl.innerHTML = `
+      <a class="pdf-download-btn" href="${esc(p.catalog_pdf_url)}" target="_blank" rel="noopener">
+        📄 カタログPDFをダウンロード
+      </a>
+    `;
+  } else {
+    pdfEl.innerHTML = '';
+  }
+
+  document.getElementById('product-detail-modal').classList.add('show');
+}
+
+function closeProductDetail() {
+  document.getElementById('product-detail-modal').classList.remove('show');
 }
 
 function updateHeroMeta(event) {
@@ -1242,11 +1639,19 @@ function renderSchedule() {
           <div class="cell-desc">公開までしばらくお待ちください</div>
         `;
       } else {
+        // 製剤タグの生成
+        const productTags = (session.product_ids || [])
+          .map(pid => PRODUCTS.find(p => p.id === pid))
+          .filter(Boolean)
+          .map(p => `<span class="cell-product-tag" onclick="event.stopPropagation(); openProductDetail('${p.id}')">💉 ${esc(p.name)}</span>`)
+          .join('');
+
         cell.innerHTML = `
           ${isSelected ? '<div class="check-badge">✓</div>' : ''}
           <div class="cell-tag">${esc(session.doctor)}</div>
           <div class="cell-proc">${esc(session.procedure)}</div>
           <div class="cell-desc">${esc(session.desc)}</div>
+          ${productTags ? `<div class="cell-products">${productTags}</div>` : ''}
           ${session.remaining > 0 ? `
             <div class="cell-stat">
               <span class="stat-num ${remainClass}">${session.remaining}</span>
