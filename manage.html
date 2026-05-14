@@ -156,6 +156,26 @@
     background: var(--warn-2);
     border: 1px solid var(--warn);
   }
+  .banner.draft {
+    background: var(--accent-2);
+    border: 1px solid var(--accent);
+    text-align: left;
+    padding: 24px 32px;
+  }
+  .banner.draft .banner-title {
+    color: var(--accent);
+    font-size: 17px;
+    margin-bottom: 10px;
+  }
+  .banner.draft .banner-desc {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.8;
+  }
+  .banner.draft .banner-desc strong {
+    color: var(--accent-d);
+    font-weight: 700;
+  }
   .banner-title {
     font-size: 16px; font-weight: 700;
     margin-bottom: 8px;
@@ -224,6 +244,7 @@
   }
   .res-status.confirmed { background: var(--success-2); color: var(--success); }
   .res-status.cancelled { background: var(--danger-2); color: var(--danger); }
+  .res-status.draft { background: var(--accent-2); color: var(--accent); }
 
   /* ───── Form ───── */
   .form-grid {
@@ -609,6 +630,15 @@
       <div class="banner-desc">再度ご参加いただける場合は、お手数ですが新規お申込みフォームよりお手続きください。</div>
     </div>
 
+    <!-- Draft banner -->
+    <div id="draft-banner" class="banner draft" style="display:none;">
+      <div class="banner-title">スケジュール選択を完了してください</div>
+      <div class="banner-desc">
+        基本情報のご登録は完了していますが、まだ <strong>スケジュール選択が完了していません</strong>。<br>
+        下記から受講したい3コマを選択して、申込を確定してください。
+      </div>
+    </div>
+
     <!-- 予約内容 -->
     <div class="section-card">
       <div class="section-head">
@@ -659,13 +689,13 @@
     <!-- スケジュール変更 -->
     <div class="section-card">
       <div class="section-head">
-        <div class="section-eyebrow">SCHEDULE CHANGE</div>
-        <h2 class="section-title">受講スケジュールの変更</h2>
-        <p class="section-desc">「現在の選択」と表示されているセッションが現在のご予約です。変更したい場合は別のセッションをクリックしてください。空席のあるセッションのみ選択可能です。</p>
+        <div class="section-eyebrow" id="sched-eyebrow">SCHEDULE CHANGE</div>
+        <h2 class="section-title" id="sched-title">受講スケジュールの変更</h2>
+        <p class="section-desc" id="sched-desc">「現在の選択」と表示されているセッションが現在のご予約です。変更したい場合は別のセッションをクリックしてください。空席のあるセッションのみ選択可能です。</p>
       </div>
       <div class="schedule" id="schedule-grid"></div>
       <div class="actions">
-        <button class="btn btn-ghost" onclick="resetScheduleSelection()">変更を取り消す</button>
+        <button class="btn btn-ghost" onclick="resetScheduleSelection()" id="btn-reset-schedule">変更を取り消す</button>
         <button class="btn btn-primary" id="btn-save-schedule" onclick="saveSchedule()" disabled>スケジュール変更を確定</button>
       </div>
     </div>
@@ -820,9 +850,12 @@ function renderAll() {
   document.getElementById('r-created').textContent = formatDateTime(RESERVATION.created_at);
   document.getElementById('r-id').textContent = RESERVATION.id.slice(0, 8).toUpperCase();
 
-  document.getElementById('r-status').innerHTML = RESERVATION.status === 'confirmed'
-    ? '<span class="res-status confirmed">確定</span>'
-    : '<span class="res-status cancelled">キャンセル済み</span>';
+  const statusHtml = {
+    confirmed: '<span class="res-status confirmed">確定</span>',
+    cancelled: '<span class="res-status cancelled">キャンセル済み</span>',
+    draft:     '<span class="res-status draft">下書き(未確定)</span>'
+  }[RESERVATION.status] || '<span class="res-status">—</span>';
+  document.getElementById('r-status').innerHTML = statusHtml;
 
   // 連絡先フォーム
   document.getElementById('f-email').value     = RESERVATION.email || '';
@@ -840,6 +873,18 @@ function renderAll() {
     document.getElementById('cancelled-banner').style.display = 'block';
     document.querySelectorAll('.btn').forEach(b => b.disabled = true);
     document.getElementById('cancel-zone').style.display = 'none';
+  } else if (RESERVATION.status === 'draft') {
+    // 下書き状態 → スケジュール選択誘導
+    document.getElementById('draft-banner').style.display = 'block';
+    document.getElementById('cancel-zone').style.display = 'none';
+
+    // スケジュールセクションを「初回選択モード」に
+    document.getElementById('sched-eyebrow').textContent = 'SCHEDULE SELECTION';
+    document.getElementById('sched-title').textContent = '受講スケジュールを選択';
+    document.getElementById('sched-desc').textContent =
+      '3コマ × 3教室の中から、各コマで受講したい1教室をお選びください。3教室は同時進行となります。すべて選択後、「予約を確定する」ボタンが押せるようになります。';
+    document.getElementById('btn-save-schedule').textContent = '予約を確定する';
+    document.getElementById('btn-reset-schedule').style.display = 'none';
   } else {
     setupCancelDeadline();
   }
@@ -902,7 +947,7 @@ function renderSchedule() {
       const session = slotSessions.find(s => s.room === room);
       if (!session) continue;
 
-      const isCurrent  = originalSelection[slot] === session.id;
+      const isCurrent  = RESERVATION.status !== 'draft' && originalSelection[slot] === session.id;
       const isSelected = currentSelection[slot] === session.id;
       const isNotReady = !session.isReady;
       const isFull     = !isNotReady && !isCurrent && session.remaining <= 0;
@@ -935,7 +980,7 @@ function renderSchedule() {
           ` : ''}
         `;
 
-        if (!isFull && RESERVATION.status === 'confirmed') {
+        if (!isFull && (RESERVATION.status === 'confirmed' || RESERVATION.status === 'draft')) {
           cell.addEventListener('click', () => selectSession(slot, session.id));
         }
       }
@@ -959,9 +1004,16 @@ function resetScheduleSelection() {
 }
 
 function updateSaveButton() {
-  const slots = Object.keys(originalSelection);
-  const changed = slots.some(slot => currentSelection[slot] !== originalSelection[slot]);
-  document.getElementById('btn-save-schedule').disabled = !changed;
+  if (RESERVATION.status === 'draft') {
+    // 下書き状態:3コマすべて選択されていれば確定可能
+    const allSelected = [1,2,3].every(slot => currentSelection[slot]);
+    document.getElementById('btn-save-schedule').disabled = !allSelected;
+  } else {
+    // 確定済み:元の選択と異なる場合のみ「変更を確定」可能
+    const slots = Object.keys(originalSelection);
+    const changed = slots.some(slot => currentSelection[slot] !== originalSelection[slot]);
+    document.getElementById('btn-save-schedule').disabled = !changed;
+  }
 }
 
 async function saveContactInfo() {
@@ -1011,29 +1063,39 @@ async function saveContactInfo() {
 async function saveSchedule() {
   const newSessionIds = Object.values(currentSelection);
 
+  if (newSessionIds.length < 3 || newSessionIds.some(id => !id)) {
+    toast('1限・2限・3限から各1教室ずつ選択してください', 'danger');
+    return;
+  }
+
   const btn = document.getElementById('btn-save-schedule');
   btn.disabled = true;
-  btn.textContent = '更新中...';
+  btn.textContent = RESERVATION.status === 'draft' ? '確定中...' : '更新中...';
 
-  const { data, error } = await sb.rpc('update_registration_sessions', {
-    p_token:           TOKEN,
-    p_new_session_ids: newSessionIds
-  });
+  // 下書きの場合は finalize、確定済みの場合は update を呼ぶ
+  const rpcName = RESERVATION.status === 'draft'
+    ? 'finalize_draft_registration'
+    : 'update_registration_sessions';
+
+  const params = RESERVATION.status === 'draft'
+    ? { p_token: TOKEN, p_session_ids: newSessionIds }
+    : { p_token: TOKEN, p_new_session_ids: newSessionIds };
+
+  const { data, error } = await sb.rpc(rpcName, params);
 
   if (error || !data?.success) {
     if (data?.error === 'sessions_full') {
       toast('選択枠が満席になりました。再選択をお願いします', 'danger');
-      await init(); // 再読み込み
+      await init();
       return;
     }
-    toast('更新に失敗しました: ' + (data?.error || error?.message), 'danger');
+    toast('処理に失敗しました: ' + (data?.error || error?.message), 'danger');
     btn.disabled = false;
-    btn.textContent = 'スケジュール変更を確定';
+    btn.textContent = RESERVATION.status === 'draft' ? '予約を確定する' : 'スケジュール変更を確定';
     return;
   }
 
-  toast('スケジュールを変更しました', 'success');
-  // データを再読み込み
+  toast(RESERVATION.status === 'draft' ? '予約を確定しました' : 'スケジュールを変更しました', 'success');
   await init();
 }
 
