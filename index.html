@@ -838,8 +838,10 @@
 <script>
 // ════════════════════════════════════════════════════════════════
 // Supabase クライアント初期化
+// 注: window.supabase は CDN が提供するライブラリ本体なので
+//     クライアントインスタンスは別名(sb)で保持
 // ════════════════════════════════════════════════════════════════
-const supabase = window.supabase.createClient(
+const sb = window.supabase.createClient(
   window.SUPABASE_CONFIG.url,
   window.SUPABASE_CONFIG.anonKey
 );
@@ -859,7 +861,7 @@ let selectedSessions = { 1: null, 2: null, 3: null };
 // ════════════════════════════════════════════════════════════════
 async function loadEventAndSessions() {
   // 受付中のイベント(最も近い日付のもの)を取得
-  const { data: events, error: eventErr } = await supabase
+  const { data: events, error: eventErr } = await sb
     .from('events')
     .select('*')
     .eq('status', 'open')
@@ -878,7 +880,7 @@ async function loadEventAndSessions() {
   updateHeroMeta(EVENT_INFO);
 
   // セッション情報(残席表示用ビューから取得)
-  const { data: sessions, error: sessErr } = await supabase
+  const { data: sessions, error: sessErr } = await sb
     .from('v_sessions_with_availability')
     .select('*')
     .eq('event_id', EVENT_ID)
@@ -1176,7 +1178,7 @@ async function submitReservation() {
   btn.textContent = '送信中...';
 
   try {
-    const { data, error } = await supabase.rpc('reserve_registration', {
+    const { data, error } = await sb.rpc('reserve_registration', {
       p_event_id:        EVENT_ID,
       p_name:            formData.name,
       p_name_kana:       formData.name_kana || null,
