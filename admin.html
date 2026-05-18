@@ -1857,10 +1857,6 @@
         <input class="modal-input" id="sem-end" type="time">
       </div>
     </div>
-    <div class="modal-row">
-      <label class="modal-label">定員(人数)</label>
-      <input class="modal-input" id="sem-capacity" type="number" min="1" max="20">
-    </div>
     <div class="modal-row" id="sem-deactivate-row" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--rule-soft);">
       <div style="display: flex; gap: 12px; align-items: center;">
         <button class="modal-btn" id="sem-deactivate-btn" onclick="toggleSessionActive()"
@@ -2413,12 +2409,13 @@ function renderDashboard() {
     for (const room of ['A','B','C']) {
       const s = SESSIONS.find(x => x.slot === slot && x.room === room);
       if (!s) { fillHtml += '<div class="fill-cell">—</div>'; continue; }
-      const pct = s.booked / s.capacity * 100;
-      const cls = s.remaining === 0 ? 'full' : s.remaining <= 2 ? 'warn' : '';
+      if (!s.is_active) {
+        fillHtml += '<div class="fill-cell" style="opacity:0.4;"><div style="font-size:11px;">削除済み</div></div>';
+        continue;
+      }
       fillHtml += `
         <div class="fill-cell">
-          <div class="fill-num ${cls}">${s.booked}/${s.capacity}</div>
-          <div class="fill-mini-bar"><div class="fill-mini-bar-fill" style="width:${pct}%"></div></div>
+          <div class="fill-num">${s.booked}<span style="font-size:11px; color:var(--text-3); font-weight:500;"> 名</span></div>
         </div>
       `;
     }
@@ -2590,7 +2587,6 @@ function renderSessionGrid() {
       if (!s) { html += '<div class="sg-cell"><div class="sg-empty">未設定</div></div>'; continue; }
 
       const isDeactivated = !s.is_active;
-      const cls = s.remaining === 0 ? 'full' : s.remaining <= 2 ? 'warn' : '';
       const participants = getConfirmed().filter(r => r.sessions.includes(s.id));
       const partsHtml = participants.length > 0
         ? `<ul class="sg-participants">${participants.map(p => `
@@ -2612,8 +2608,8 @@ function renderSessionGrid() {
             <div class="sg-doctor ${!s.doctor ? 'empty' : ''}">${esc(doctorDisplay)}</div>
             <div class="sg-procedure ${!s.procedure ? 'empty' : ''}">${esc(procedureDisplay)}</div>
             <div class="sg-fill">
-              <span class="sg-fill-num ${cls}">${s.booked}/${s.capacity}</span>
-              <span class="sg-fill-label">${s.remaining === 0 ? '満席' : `残${s.remaining}席`}</span>
+              <span class="sg-fill-num">${s.booked}</span>
+              <span class="sg-fill-label">名 申込</span>
             </div>
           </div>
           ${partsHtml}
@@ -2650,7 +2646,6 @@ function openSessionEditModal(sessionId) {
   document.getElementById('sem-desc').value         = s.desc || '';
   document.getElementById('sem-start').value        = s.start || '';
   document.getElementById('sem-end').value          = s.end || '';
-  document.getElementById('sem-capacity').value     = s.capacity || 6;
 
   // 使用製剤のチェックボックスを描画
   const productsList = document.getElementById('sem-products-list');
@@ -2743,24 +2738,11 @@ async function saveSessionEdit() {
   const desc         = document.getElementById('sem-desc').value.trim();
   const start        = document.getElementById('sem-start').value;
   const end          = document.getElementById('sem-end').value;
-  const capacity     = parseInt(document.getElementById('sem-capacity').value, 10);
 
   // 製剤IDを収集
   const product_ids = Array.from(
     document.querySelectorAll('#sem-products-list input[type="checkbox"]:checked')
   ).map(cb => cb.value);
-
-  if (!capacity || capacity < 1) {
-    toast('定員は1以上で入力してください', 'danger');
-    return;
-  }
-
-  const s = SESSIONS.find(x => x.id === editingSessionId);
-  if (s && s.booked > capacity) {
-    if (!confirm(`現在 ${s.booked} 名が予約済みのため、新定員 ${capacity} 名に収まりません。続行しますか?`)) {
-      return;
-    }
-  }
 
   const { error } = await sb
     .from('sessions')
@@ -2772,8 +2754,7 @@ async function saveSessionEdit() {
       procedure_description: desc || null,
       product_ids: product_ids,
       start_time: start || null,
-      end_time: end || null,
-      capacity: capacity
+      end_time: end || null
     })
     .eq('id', editingSessionId);
 
