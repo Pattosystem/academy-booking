@@ -1092,7 +1092,7 @@
     <div class="step-divider"></div>
     <div class="step" data-step="3">
       <div class="step-circle">3</div>
-      <span>確認・確定</span>
+      <span>確認・送信</span>
     </div>
   </div>
 
@@ -1213,7 +1213,7 @@
     <div class="section-card">
       <div class="section-head">
         <h2 class="section-title">お申込内容のご確認</h2>
-        <p class="section-desc">内容に誤りがなければ「予約を確定する」を押してください。確定後、登録メールアドレス宛に受付完了メールをお送りします。</p>
+        <p class="section-desc">内容に誤りがなければ「申込を送信する」を押してください。最終決定後、事務局よりご登録のメールアドレス宛にご案内をお送りします。</p>
       </div>
 
       <div class="confirm-section">
@@ -1228,7 +1228,7 @@
 
       <div class="actions">
         <button class="btn btn-ghost" onclick="goToScreen(2)">スケジュール選択に戻る</button>
-        <button class="btn btn-primary" onclick="submitReservation()">予約を確定する</button>
+        <button class="btn btn-primary" onclick="submitReservation()">申込を送信する</button>
       </div>
     </div>
   </section>
@@ -1238,16 +1238,17 @@
     <div class="success-wrap">
       <div class="success-mark"></div>
       <h2 class="success-title" id="success-title">お申込ありがとうございました</h2>
-      <p class="success-sub" id="success-sub">Your reservation has been confirmed</p>
+      <p class="success-sub" id="success-sub">Your application has been received</p>
       <div class="success-detail" id="success-detail">
-        ご登録のメールアドレス宛に、受付完了メールをお送りしました。<br>
-        開催1週間前(6月21日頃)に座学資料を、前日にリマインダーをお送りします。<br><br>
+        ご希望のスケジュールを受け付けました。<br>
+        最終決定されましたら、事務局よりご登録いただいたメールアドレスへ<br>
+        2〜3営業日後にご案内のメールをお送りします。<br><br>
         ご質問はメールにてお気軽にお問い合わせください。
       </div>
 
       <div class="manage-link-box">
-        <div class="manage-link-label" id="manage-link-label">予約内容の確認・変更</div>
-        <div class="manage-link-desc" id="manage-link-desc">下記URLから、ご予約の確認・変更・キャンセルをいつでも行えます。確認メールにも記載されますが、念のためブックマーク保存をおすすめします。</div>
+        <div class="manage-link-label" id="manage-link-label">申込内容の確認・変更</div>
+        <div class="manage-link-desc" id="manage-link-desc">下記URLから、お申込内容の確認・変更・キャンセルをいつでも行えます。念のためブックマーク保存をおすすめします。</div>
         <div class="manage-link-url" id="manage-link-url"></div>
         <button class="btn-copy-url" onclick="copyManageUrl()">URLをコピー</button>
       </div>
@@ -1827,9 +1828,9 @@ async function submitReservation() {
 
     if (error) {
       console.error('Supabase RPC error:', error);
-      toast('予約処理中にエラーが発生しました: ' + (error.message || '不明なエラー'));
+      toast('送信処理中にエラーが発生しました: ' + (error.message || '不明なエラー'));
       btn.disabled = false;
-      btn.textContent = '予約を確定する';
+      btn.textContent = '申込を送信する';
       return;
     }
 
@@ -1848,12 +1849,12 @@ async function submitReservation() {
         }
         goToScreen(2);
         btn.disabled = false;
-        btn.textContent = '予約を確定する';
+        btn.textContent = '申込を送信する';
         return;
       }
-      toast('予約処理に失敗しました: ' + (data?.error || '不明なエラー'));
+      toast('送信処理に失敗しました: ' + (data?.error || '不明なエラー'));
       btn.disabled = false;
-      btn.textContent = '予約を確定する';
+      btn.textContent = '申込を送信する';
       return;
     }
 
@@ -1863,14 +1864,14 @@ async function submitReservation() {
     document.getElementById('manage-link-url').textContent = manageUrl;
     window._manageUrl = manageUrl;
 
-    console.log('予約完了:', data);
+    console.log('申込完了:', data);
     goToScreen(4);
 
   } catch (e) {
     console.error('Unexpected error:', e);
     toast('予期しないエラーが発生しました。時間をおいて再度お試しください');
     btn.disabled = false;
-    btn.textContent = '予約を確定する';
+    btn.textContent = '申込を送信する';
   }
 }
 
