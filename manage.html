@@ -5,6 +5,15 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
+
+<!-- Google Analytics (GA4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-V2J2FSXSKD"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-V2J2FSXSKD');
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>予約の確認・変更 | VANDS & LIAS Medical Academy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1159,18 +1168,13 @@ function renderSchedule() {
       const isSelected = currentSelection[slot] === session.id;
       const isDeactivated = !session.is_active;
       const isNotReady = !isDeactivated && !session.isReady;
-      const isFull     = !isDeactivated && !isNotReady && !isCurrent && session.remaining <= 0;
 
       const cell = document.createElement('div');
       cell.className = 'sch-cell';
       if (isCurrent && isSelected) cell.classList.add('current');
       if (isSelected) cell.classList.add('selected');
-      if (isFull) cell.classList.add('full');
       if (isNotReady) cell.classList.add('not-ready');
       if (isDeactivated) cell.classList.add('deactivated');
-
-      const remainClass = session.remaining === 0 ? 'crit'
-                       : session.remaining <= 2 ? 'warn' : '';
 
       if (isDeactivated) {
         cell.innerHTML = `
@@ -1195,15 +1199,9 @@ function renderSchedule() {
           <div class="cell-proc">${esc(session.procedure)}</div>
           <div class="cell-desc">${esc(session.desc)}</div>
           ${productTags ? `<div class="cell-products">${productTags}</div>` : ''}
-          ${!isFull ? `
-            <div class="cell-stat">
-              <span class="stat-num ${remainClass}">${session.remaining}</span>
-              <span class="stat-label">/ ${session.capacity} 残席</span>
-            </div>
-          ` : ''}
         `;
 
-        if (!isFull && (RESERVATION.status === 'confirmed' || RESERVATION.status === 'draft')) {
+        if (RESERVATION.status === 'confirmed' || RESERVATION.status === 'draft') {
           cell.addEventListener('click', () => selectSession(slot, session.id));
         }
       }
