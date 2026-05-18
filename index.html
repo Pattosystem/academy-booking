@@ -5,6 +5,15 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
+
+<!-- Google Analytics (GA4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-V2J2FSXSKD"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-V2J2FSXSKD');
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>受講申込 | VANDS & LIAS Medical Academy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1636,16 +1645,11 @@ function renderSchedule() {
 
       const isDeactivated = !session.is_active;
       const isNotReady = !isDeactivated && !session.isReady;
-      const isFull = !isDeactivated && !isNotReady && session.remaining <= 0;
       const isSelected = selectedSessions[slot] === session.id;
 
       if (isDeactivated) cell.classList.add('deactivated');
       else if (isNotReady) cell.classList.add('not-ready');
-      else if (isFull) cell.classList.add('full');
       if (isSelected) cell.classList.add('selected');
-
-      const remainClass = session.remaining === 0 ? 'crit'
-                       : session.remaining <= 2 ? 'warn' : '';
 
       if (isDeactivated) {
         // 削除済みセル
@@ -1675,17 +1679,9 @@ function renderSchedule() {
           <div class="cell-proc">${esc(session.procedure)}</div>
           <div class="cell-desc">${esc(session.desc)}</div>
           ${productTags ? `<div class="cell-products">${productTags}</div>` : ''}
-          ${session.remaining > 0 ? `
-            <div class="cell-stat">
-              <span class="stat-num ${remainClass}">${session.remaining}</span>
-              <span class="stat-label">/ ${session.capacity} 残席</span>
-            </div>
-          ` : ''}
         `;
 
-        if (session.remaining > 0) {
-          cell.addEventListener('click', () => selectSession(slot, session.id));
-        }
+        cell.addEventListener('click', () => selectSession(slot, session.id));
       }
 
       grid.appendChild(cell);
