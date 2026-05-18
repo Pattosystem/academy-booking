@@ -1362,19 +1362,19 @@
     <!-- Login form -->
     <div id="login-form-area">
       <h1 class="login-title">管理者ログイン</h1>
-      <p class="login-desc">登録されたメールアドレス宛にログイン用リンクをお送りします。メール内のリンクをクリックするとログインが完了します。</p>
+      <p class="login-desc">管理画面のパスワードを入力してください。一度ログインすると、このブラウザでは次回以降パスワード入力なしでアクセスできます。</p>
 
       <div id="login-error-area"></div>
 
       <div class="login-input-row">
-        <label class="login-label">メールアドレス</label>
-        <input class="login-input" id="login-email" type="email" placeholder="admin@example.com">
+        <label class="login-label">パスワード</label>
+        <input class="login-input" id="login-email" type="password" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter') submitPassword()">
       </div>
-      <button class="login-btn" id="login-btn" onclick="sendMagicLink()">ログインリンクを送信</button>
-      <div class="login-hint">※ ログインリンクの有効期限は1時間です</div>
+      <button class="login-btn" id="login-btn" onclick="submitPassword()">ログイン</button>
+      <div class="login-hint">※ パスワードを忘れた場合は管理者にお問い合わせください</div>
     </div>
 
-    <!-- Magic link sent -->
+    <!-- Magic link sent (廃止・非表示) -->
     <div id="login-sent-area" style="display:none;">
       <div class="login-sent">
         <div class="login-sent-icon">✉️</div>
@@ -1386,11 +1386,11 @@
       </div>
     </div>
 
-    <!-- Access denied -->
+    <!-- Access denied (廃止・非表示) -->
     <div id="access-denied-area" style="display:none;">
       <div class="access-denied">
         <strong>アクセス権限がありません</strong><br>
-        このアカウントには管理画面へのアクセス権がありません。管理者として登録されたメールアドレスでログインしてください。
+        このアカウントには管理画面へのアクセス権がありません。
       </div>
       <button class="login-btn" onclick="logoutAndReset()">別のアカウントでログイン</button>
     </div>
@@ -1967,45 +1967,43 @@ const STATUS_LABEL = {
 };
 
 // ════════════════════════════════════════════════════════════════
-// 起動: 認証チェック
+// 簡易パスワード保護
+// パスワードはここで変更可能(複数人で運用する場合は環境に応じて調整)
+// ════════════════════════════════════════════════════════════════
+const ADMIN_PASSWORD = 'lias0032';
+const PASSWORD_STORAGE_KEY = 'lias_academy_admin_auth';
+
+// ════════════════════════════════════════════════════════════════
+// 起動: パスワードチェック
 // ════════════════════════════════════════════════════════════════
 async function bootstrap() {
-  const { data: { session } } = await sb.auth.getSession();
+  // localStorage に保存されたパスワードを確認
+  const savedPassword = localStorage.getItem(PASSWORD_STORAGE_KEY);
 
-  if (!session) {
-    showLoginScreen();
+  if (savedPassword === ADMIN_PASSWORD) {
+    // 保存済みパスワードが正しい → そのまま起動
+    await launchAdmin();
     return;
   }
 
-  const email = session.user.email;
-  if (email !== ADMIN_EMAIL) {
-    showAccessDenied();
-    return;
-  }
+  // パスワード未保存・不正 → ログイン画面表示
+  showPasswordScreen();
+}
 
-  // 認証OK → 管理画面起動
-  document.getElementById('user-email').textContent = email;
+async function launchAdmin() {
+  document.getElementById('user-email').textContent = 'Administrator';
   await loadAllData();
   showAdminContent();
   subscribeRealtime();
 }
 
-function showLoginScreen() {
+function showPasswordScreen() {
   document.getElementById('full-loading').style.display = 'none';
   document.getElementById('admin-content').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('login-form-area').style.display = 'block';
   document.getElementById('login-sent-area').style.display = 'none';
   document.getElementById('access-denied-area').style.display = 'none';
-}
-
-function showAccessDenied() {
-  document.getElementById('full-loading').style.display = 'none';
-  document.getElementById('admin-content').style.display = 'none';
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('login-form-area').style.display = 'none';
-  document.getElementById('login-sent-area').style.display = 'none';
-  document.getElementById('access-denied-area').style.display = 'block';
 }
 
 function showAdminContent() {
@@ -2015,55 +2013,41 @@ function showAdminContent() {
 }
 
 // ════════════════════════════════════════════════════════════════
-// マジックリンク送信
+// パスワード認証
 // ════════════════════════════════════════════════════════════════
-async function sendMagicLink() {
-  const email = document.getElementById('login-email').value.trim().toLowerCase();
-  const btn = document.getElementById('login-btn');
+async function submitPassword() {
+  const passwordInput = document.getElementById('login-email');
+  const password = passwordInput.value.trim();
   const errEl = document.getElementById('login-error-area');
   errEl.innerHTML = '';
 
-  if (!email) {
-    errEl.innerHTML = '<div class="login-error">メールアドレスを入力してください</div>';
-    return;
-  }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    errEl.innerHTML = '<div class="login-error">メールアドレスの形式が正しくありません</div>';
+  if (!password) {
+    errEl.innerHTML = '<div class="login-error">パスワードを入力してください</div>';
     return;
   }
 
-  btn.disabled = true;
-  btn.textContent = '送信中...';
-
-  const { error } = await sb.auth.signInWithOtp({
-    email,
-    options: {
-      emailRedirectTo: window.location.origin + window.location.pathname,
-    }
-  });
-
-  btn.disabled = false;
-  btn.textContent = 'ログインリンクを送信';
-
-  if (error) {
-    errEl.innerHTML = `<div class="login-error">送信に失敗しました: ${esc(error.message)}</div>`;
+  if (password !== ADMIN_PASSWORD) {
+    errEl.innerHTML = '<div class="login-error">パスワードが正しくありません</div>';
+    passwordInput.value = '';
     return;
   }
 
-  document.getElementById('sent-email').textContent = email;
-  document.getElementById('login-form-area').style.display = 'none';
-  document.getElementById('login-sent-area').style.display = 'block';
+  // 正しいパスワード → 保存して起動
+  localStorage.setItem(PASSWORD_STORAGE_KEY, password);
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('full-loading').style.display = 'flex';
+  await launchAdmin();
 }
 
 async function doLogout() {
-  await sb.auth.signOut();
+  if (!confirm('ログアウトしますか?(再度パスワード入力が必要になります)')) return;
+  localStorage.removeItem(PASSWORD_STORAGE_KEY);
   location.reload();
 }
 
-async function logoutAndReset() {
-  await sb.auth.signOut();
-  location.reload();
-}
+// 廃止された関数(後方互換のため空関数として残す)
+async function sendMagicLink() { return submitPassword(); }
+async function logoutAndReset() { return doLogout(); }
 
 // ════════════════════════════════════════════════════════════════
 // データ読み込み
@@ -3711,15 +3695,6 @@ function toast(msg, type) {
   t.className = 'toast show' + (type ? ' ' + type : '');
   setTimeout(() => t.classList.remove('show'), 2800);
 }
-
-// Auth 状態変更を監視
-sb.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_IN' && session) {
-    bootstrap();
-  } else if (event === 'SIGNED_OUT') {
-    location.reload();
-  }
-});
 
 // 起動
 bootstrap();
