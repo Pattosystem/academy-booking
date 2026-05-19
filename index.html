@@ -435,6 +435,116 @@
     background: var(--primary-2);
   }
 
+  /* ───── Brochure (ご案内チラシ) modal ───── */
+  .brochure-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(11, 30, 63, 0.88);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1500;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  .brochure-overlay.show {
+    display: flex;
+  }
+  .brochure-content {
+    position: relative;
+    max-width: 900px;
+    width: 100%;
+    max-height: 95vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .brochure-close {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: #fff;
+    border-radius: 50%;
+    font-size: 24px;
+    font-weight: 300;
+    color: var(--primary);
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: transform 0.15s;
+  }
+  .brochure-close:hover {
+    transform: scale(1.08);
+  }
+  .brochure-image {
+    max-width: 100%;
+    max-height: 80vh;
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    background: #fff;
+  }
+  .brochure-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .brochure-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .brochure-btn-primary {
+    background: var(--coral, #DC4866);
+    color: #fff;
+  }
+  .brochure-btn-primary:hover {
+    background: #c43d59;
+    transform: translateY(-1px);
+  }
+  .brochure-btn-ghost {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.3);
+  }
+  .brochure-btn-ghost:hover {
+    background: rgba(255,255,255,0.25);
+  }
+  @media (max-width: 600px) {
+    .brochure-overlay {
+      padding: 10px;
+    }
+    .brochure-close {
+      top: 8px;
+      right: 8px;
+    }
+    .brochure-image {
+      max-height: 75vh;
+    }
+    .brochure-btn {
+      padding: 10px 16px;
+      font-size: 13px;
+    }
+  }
+
   /* ───── Products tag in session cell ───── */
   .cell-products {
     display: flex;
@@ -1070,6 +1180,15 @@
       </span>
       <span class="instructors-link-arrow">→</span>
     </a>
+
+    <a class="instructors-link" href="javascript:void(0)" onclick="openBrochure()">
+      <span class="instructors-link-icon">📄</span>
+      <span class="instructors-link-text">
+        <span class="instructors-link-label">ご案内チラシを見る</span>
+        <span class="instructors-link-desc">第一回特別講義の概要・タイムテーブル・講師情報</span>
+      </span>
+      <span class="instructors-link-arrow">→</span>
+    </a>
   </div>
 
   <!-- アカデミー概要 -->
@@ -1286,6 +1405,20 @@
   </div>
 </div>
 
+<!-- ご案内チラシモーダル -->
+<div class="brochure-overlay" id="brochure-modal" onclick="if(event.target===this) closeBrochure()">
+  <div class="brochure-content">
+    <button class="brochure-close" onclick="closeBrochure()" aria-label="閉じる">×</button>
+    <img src="academy-flyer.jpg" alt="VANDS &amp; LIAS Medical Academy 第一回特別講義 ご案内チラシ" class="brochure-image" id="brochure-image">
+    <div class="brochure-actions">
+      <a href="academy-flyer.jpg" target="_blank" rel="noopener" class="brochure-btn brochure-btn-primary">
+        <span>📥</span> フルサイズで開く / ダウンロード
+      </a>
+      <button class="brochure-btn brochure-btn-ghost" onclick="closeBrochure()">閉じる</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1470,6 +1603,29 @@ function openProductDetail(productId) {
 function closeProductDetail() {
   document.getElementById('product-detail-modal').classList.remove('show');
 }
+
+// ════════════════════════════════════════════════════════════════
+// ご案内チラシモーダル
+// ════════════════════════════════════════════════════════════════
+function openBrochure() {
+  document.getElementById('brochure-modal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeBrochure() {
+  document.getElementById('brochure-modal').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+// ESCキーでチラシモーダルを閉じる
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const brochureModal = document.getElementById('brochure-modal');
+    if (brochureModal && brochureModal.classList.contains('show')) {
+      closeBrochure();
+    }
+  }
+});
 
 function updateHeroMeta(event) {
   // 開催日表示
